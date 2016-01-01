@@ -17,29 +17,38 @@
  */
 
 /**
- * @file reply_impl.cpp
+ * @file string_reply.h
  * @brief 
  * @author Finalcheat
  * @version 0.01
  * @date 2016-01-01
  */
 
+#ifndef STRING_REPLY
+#define STRING_REPLY
 
-#ifndef REPLY_IMPL
-#define REPLY_IMPL
-
+#include <boost/shared_ptr.hpp>
 
 namespace cpp_redis_client {
 
-class ReplyImpl
+
+class StringReplyImpl;
+
+class StringReply
 {
     public:
-        ReplyImpl();
+        explicit StringReply(const boost::shared_ptr<char>& buf, const int length);
+        std::string toString() const;
+        int getLength() const;
+        bool isNull() const;
+
+    public:
+        // StringReply& operator=(const StringReply& relpy);
 
     private:
-        int len;
-        char *buf;
+        boost::shared_ptr<StringReplyImpl> impl;
 };
+
 
 }
 
