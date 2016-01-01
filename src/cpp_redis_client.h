@@ -28,6 +28,7 @@
 #ifndef CPP_REDIS_CLIENT
 #define CPP_REDIS_CLIENT
 
+#include "string_reply.h"
 #include <string>
 
 namespace cpp_redis_client {
@@ -65,7 +66,8 @@ class RedisClient
         int move(const std::string& key, const size_t db);
         int exists(const std::string& key);
 
-        std::string get(const std::string& key) const;
+        cpp_redis_client::StringReply get(const std::string& key);
+        // std::string get(const std::string& key) const;
         std::string getset(const std::string& key, const std::string& value);
 
     private:

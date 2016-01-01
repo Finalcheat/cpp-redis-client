@@ -25,6 +25,7 @@
  */
 
 #include "cpp_redis_client.h"
+#include "string_reply.h"
 #include "cpp_redis_client_impl.cpp"
 #include <iostream>
 
@@ -78,13 +79,12 @@ int RedisClient::setnx(const std::string& key, const std::string& value)
 }
 
 
-std::string RedisClient::get(const std::string& key) const
+cpp_redis_client::StringReply RedisClient::get(const std::string& key)
 {
     if (impl)
     {
         return impl->get(key);
     }
-    return "";
 }
 
 const size_t RedisClient::append(const std::string& key, const std::string& value)
@@ -277,6 +277,26 @@ int RedisClient::exists(const std::string& key)
 
 int main()
 {
+    cpp_redis_client::RedisClient r("localhost");
+    {
+        cpp_redis_client::StringReply re = r.get("f");
+        std::cout << "[" << re.getLength() << "]" << re.toString() << std::endl;
+        re = r.get("mykey");
+        std::cout << "[" << re.getLength() << "]" << re.toString() << std::endl;
+        re = r.get("enable");
+        try
+        {
+            std::cout << "[" << re.getLength() << "]" << std::endl;
+            std::cout << re.toString() << std::endl;
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
+        re = r.get("test");
+        std::cout << "[" << re.getLength() << "]" << re.toString() << std::endl;
+    }
+    // return 0;
     // cpp_redis_client::RedisClient redis_obj1;
     cpp_redis_client::RedisClient redis_obj2("localhost");
     // redis_obj2.set("f", "c");
