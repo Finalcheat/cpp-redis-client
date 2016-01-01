@@ -30,6 +30,8 @@
 
 #include "string_reply.h"
 #include <string>
+#include <map>
+#include <vector>
 
 namespace cpp_redis_client {
 
@@ -42,22 +44,36 @@ class RedisClient
         RedisClient(const std::string& host, const std::string& port = "6379");
         ~RedisClient();
 
+    // String
     public:
-        void set(const std::string& key, const std::string& value);
-        void setex(const std::string& key, const size_t ttl, const std::string& value);
-        int setnx(const std::string& key, const std::string& value);
         const size_t append(const std::string& key, const std::string& value);
-        int pexpire(const std::string& key, const size_t milliseconds);
-        int expire(const std::string& key, const size_t seconds);
-        size_t getbit(const std::string& key, const size_t offset);
-        int incr(const std::string& key);
-        int incrby(const std::string& key, const int amount);
+        size_t bitcount(const std::string& key, const int start = 0, const int end = -1);
         int decr(const std::string& key);
         int decrby(const std::string& key, const int amount);
+        cpp_redis_client::StringReply get(const std::string& key);
+        size_t getbit(const std::string& key, const size_t offset);
+        std::string getrange(const std::string& key, const int start, const int end);
+        std::string getset(const std::string& key, const std::string& value);
+        int incr(const std::string& key);
+        int incrby(const std::string& key, const int amount);
+        float incrbyfloat(const std::string& key, const float amount);
+        std::vector<cpp_redis_client::StringReply> mget(const std::vector<std::string>& keys);
+        void mset(const std::map<std::string, std::string>& kvMap);
+        int msetnx(const std::map<std::string, std::string>& kvMap);
+        void psetex(const std::string &key, const size_t milliseconds, const std::string& value);
+        void set(const std::string& key, const std::string& value);
+        size_t setbit(const std::string& key, const size_t offset, const size_t value);
+        void setex(const std::string& key, const size_t ttl, const std::string& value);
+        int setnx(const std::string& key, const std::string& value);
+        size_t setrange(const std::string& key, const size_t offset, const std::string& value);
         size_t strlen(const std::string& key);
+
+
+    public:
+        int pexpire(const std::string& key, const size_t milliseconds);
+        int expire(const std::string& key, const size_t seconds);
         int ttl(const std::string& key);
         int pttl(const std::string& key);
-        std::string getrange(const std::string& key, const int start, const int end);
         bool ping();
         int persist(const std::string& key);
         int rename(const std::string& srcKey, const std::string& dstKey);
@@ -65,10 +81,9 @@ class RedisClient
         size_t llen(const std::string& key);
         int move(const std::string& key, const size_t db);
         int exists(const std::string& key);
+        size_t del(const std::string& key);
 
-        cpp_redis_client::StringReply get(const std::string& key);
         // std::string get(const std::string& key) const;
-        std::string getset(const std::string& key, const std::string& value);
 
     private:
         RedisClientImpl *impl;

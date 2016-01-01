@@ -39,6 +39,7 @@ class StringReplyImpl
         explicit StringReplyImpl(const boost::shared_ptr<char>& buf, const int length);
         ~StringReplyImpl();
         int getLength() const { return _length; }
+        int size() const { return _length; }
         char* getBuf() { return _buf.get(); }
         std::string toString() const;
         bool isNull() const;
@@ -72,7 +73,7 @@ StringReplyImpl::StringReplyImpl(const boost::shared_ptr<char>& buf, const int l
 
 StringReplyImpl::~StringReplyImpl()
 {
-    std::cout << "~StringReplyImpl" << std::endl;
+    // std::cout << "~StringReplyImpl" << std::endl;
 }
 
 

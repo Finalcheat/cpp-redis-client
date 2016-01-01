@@ -85,6 +85,7 @@ cpp_redis_client::StringReply RedisClient::get(const std::string& key)
     {
         return impl->get(key);
     }
+    return cpp_redis_client::StringReply(boost::shared_ptr<char>(), -1);
 }
 
 const size_t RedisClient::append(const std::string& key, const std::string& value)
@@ -271,11 +272,59 @@ int RedisClient::exists(const std::string& key)
 }
 
 
+size_t RedisClient::bitcount(const std::string& key, const int start, const int end)
+{
+    if (impl)
+    {
+        return impl->bitcount(key, start, end);
+    }
+    return 0;
+}
+
+
+size_t RedisClient::del(const std::string& key)
+{
+    if (impl)
+    {
+        return impl->del(key);
+    }
+    return 0;
+}
+
+
+size_t RedisClient::setbit(const std::string& key, const size_t offset, const size_t value)
+{
+    if (impl)
+    {
+        return impl->setbit(key, offset, value);
+    }
+    return 0;
+}
+
+
+void RedisClient::psetex(const std::string& key, const size_t milliseconds, const std::string& value)
+{
+    if (impl)
+    {
+        impl->psetex(key, milliseconds, value);
+    }
+}
+
+size_t RedisClient::setrange(const std::string& key, const size_t offset, const std::string& value)
+{
+    if (impl)
+    {
+        return impl->setrange(key, offset, value);
+    }
+    return 0;
+}
+
+
 
 
 }
 
-int main()
+int test_main()
 {
     cpp_redis_client::RedisClient r("localhost");
     {
