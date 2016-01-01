@@ -87,6 +87,11 @@ class RedisClientImpl
         std::string getset(const std::string& key, const std::string& value);
         size_t strlen(const std::string& key);
         bool ping();
+        size_t bitcount(const std::string& key, const int start, const int end);
+        size_t del(const std::string& key);
+        size_t setbit(const std::string& key, const size_t offset, const size_t value);
+        void psetex(const std::string& key, const size_t milliseconds, const std::string& value);
+        size_t setrange(const std::string& key, const size_t offset, const std::string& value);
 
 
     private:
@@ -775,7 +780,9 @@ size_t RedisClientImpl::getbit(const std::string& key, const size_t offset)
 std::string RedisClientImpl::getset(const std::string& key, const std::string& value)
 {
     _sendCommandToRedisServer("GETSET", key, value);
-    return "";
+    std::string response;
+    _getBulkResponse(response);
+    return response;
 }
 
 size_t RedisClientImpl::strlen(const std::string& key)
@@ -954,6 +961,42 @@ int RedisClientImpl::handler(const char * response, const size_t len)
         ;
     }
     return 0;
+}
+
+
+
+
+size_t RedisClientImpl::bitcount(const std::string& key, const int start, const int end)
+{
+    _sendCommandToRedisServer("BITCOUNT", key, start, end);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::del(const std::string& key)
+{
+    _sendCommandToRedisServer("DEL", key);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::setbit(const std::string& key, const size_t offset, const size_t value)
+{
+    assert(value == 0 || value == 1);
+    _sendCommandToRedisServer("SETBIT", key, offset, value);
+    return _getNumResponse();
+}
+
+void RedisClientImpl::psetex(const std::string& key, const size_t milliseconds, const std::string& value)
+{
+    _sendCommandToRedisServer("PSETEX", key, milliseconds, value);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+size_t RedisClientImpl::setrange(const std::string& key, const size_t offset, const std::string& value)
+{
+    _sendCommandToRedisServer("SETRANGE", key, offset, value);
+    return _getNumResponse();
 }
 
 

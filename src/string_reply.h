@@ -40,6 +40,7 @@ class StringReply
         explicit StringReply(const boost::shared_ptr<char>& buf, const int length);
         std::string toString() const;
         int getLength() const;
+        int size() const;
         bool isNull() const;
 
     public:

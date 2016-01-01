@@ -43,6 +43,7 @@ std::string StringReply::toString() const
     {
         return impl->toString();
     }
+    return "";
 }
 
 
@@ -64,5 +65,16 @@ bool StringReply::isNull() const
     }
     return true;
 }
+
+
+int StringReply::size() const
+{
+    if (impl)
+    {
+        return impl->size();
+    }
+    return -1;
+}
+
 
 }
