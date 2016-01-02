@@ -40,7 +40,7 @@ class StringReplyImpl
         ~StringReplyImpl();
         int getLength() const { return _length; }
         int size() const { return _length; }
-        char* getBuf() { return _buf.get(); }
+        char* getBuf() const { return _buf.get(); }
         std::string toString() const;
         bool isNull() const;
 
@@ -50,16 +50,38 @@ class StringReplyImpl
 };
 
 
+bool operator==(const StringReplyImpl& lhs, const std::string& rhs)
+{
+    int lhsLength = lhs.getLength();
+    if (lhsLength == -1)
+        return false;
+
+    int rhsLength = rhs.size();
+    if (lhsLength != rhsLength)
+        return false;
+
+    char* buf = lhs.getBuf();
+    for (int i = 0; i < lhsLength; ++i)
+    {
+        if (buf[i] != rhs[i])
+            return false;
+    }
+
+    return true;
+}
+
+
 std::ostream& operator<<(std::ostream& os, StringReplyImpl& impl)
 {
-    char* buf = impl.getBuf();
-    // os << (*buf);
     const int length = impl.getLength();
+    if (length == -1)
+        return os;
+    char* buf = impl.getBuf();
     char* end = buf + length;
-    // while (buf != end)
-    // {
-        // os << *buf++;
-    // }
+    while (buf != end)
+    {
+        os << *buf++;
+    }
     return os;
 }
 
