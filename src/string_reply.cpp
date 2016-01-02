@@ -76,5 +76,15 @@ int StringReply::size() const
     return -1;
 }
 
+bool StringReply::operator==(const std::string& rhs)
+{
+    return *impl == rhs;
+}
+
+std::ostream& operator<<(std::ostream& os, const StringReply& reply)
+{
+    return os << *(reply.impl);
+}
+
 
 }

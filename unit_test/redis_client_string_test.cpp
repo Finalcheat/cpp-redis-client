@@ -176,6 +176,21 @@ BOOST_AUTO_TEST_CASE(incrby)
 }
 
 
+BOOST_AUTO_TEST_CASE(incrbyfloat)
+{
+    const std::string key = "incrbyfloat_test_key";
+    const std::string value = "10.50";
+    const float amount = 10.5;
+    r.set(key, value);
+
+    std::string num = r.incrbyfloat(key, amount);
+    // std::cout << num << std::endl;
+    BOOST_CHECK(num == "21");
+
+    r.del(key);
+}
+
+
 BOOST_AUTO_TEST_CASE(psetex)
 {
     const std::string key = "psetex_test_key";

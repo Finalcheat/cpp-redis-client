@@ -44,6 +44,25 @@ class RedisClient
         RedisClient(const std::string& host, const std::string& port = "6379");
         ~RedisClient();
 
+
+    // Keys
+    public:
+        size_t del(const std::string& key);
+        cpp_redis_client::StringReply dump(const std::string& key);
+        int exists(const std::string& key);
+        int expire(const std::string& key, const size_t seconds);
+        size_t expireat(const std::string& key, const size_t timestamp);
+        int move(const std::string& key, const size_t db);
+        int persist(const std::string& key);
+        int pexpire(const std::string& key, const size_t milliseconds);
+        int pexpireat(const std::string& key, const size_t millisecondsTimestamp);
+        int pttl(const std::string& key);
+        cpp_redis_client::StringReply randomkey();
+        void rename(const std::string& srcKey, const std::string& dstKey);
+        int renamenx(const std::string& srcKey, const std::string& dstKey);
+        int ttl(const std::string& key);
+
+
     // String
     public:
         const size_t append(const std::string& key, const std::string& value);
@@ -56,7 +75,7 @@ class RedisClient
         std::string getset(const std::string& key, const std::string& value);
         int incr(const std::string& key);
         int incrby(const std::string& key, const int amount);
-        float incrbyfloat(const std::string& key, const float amount);
+        std::string incrbyfloat(const std::string& key, const float amount);
         std::vector<cpp_redis_client::StringReply> mget(const std::vector<std::string>& keys);
         void mset(const std::map<std::string, std::string>& kvMap);
         int msetnx(const std::map<std::string, std::string>& kvMap);
@@ -70,18 +89,8 @@ class RedisClient
 
 
     public:
-        int pexpire(const std::string& key, const size_t milliseconds);
-        int expire(const std::string& key, const size_t seconds);
-        int ttl(const std::string& key);
-        int pttl(const std::string& key);
         bool ping();
-        int persist(const std::string& key);
-        int rename(const std::string& srcKey, const std::string& dstKey);
-        int renamenx(const std::string& srcKey, const std::string& dstKey);
         size_t llen(const std::string& key);
-        int move(const std::string& key, const size_t db);
-        int exists(const std::string& key);
-        size_t del(const std::string& key);
 
         // std::string get(const std::string& key) const;
 

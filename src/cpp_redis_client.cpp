@@ -226,13 +226,12 @@ int RedisClient::persist(const std::string& key)
     return 0;
 }
 
-int RedisClient::rename(const std::string& srcKey, const std::string& dstKey)
+void RedisClient::rename(const std::string& srcKey, const std::string& dstKey)
 {
     if (impl)
     {
-        return impl->rename(srcKey, dstKey);
+        impl->rename(srcKey, dstKey);
     }
-    return 0;
 }
 
 int RedisClient::renamenx(const std::string& srcKey, const std::string& dstKey)
@@ -317,6 +316,54 @@ size_t RedisClient::setrange(const std::string& key, const size_t offset, const 
         return impl->setrange(key, offset, value);
     }
     return 0;
+}
+
+std::string RedisClient::incrbyfloat(const std::string& key, const float amount)
+{
+    if (impl)
+    {
+        return impl->incrbyfloat(key, amount);
+    }
+    return "";
+}
+
+size_t RedisClient::expireat(const std::string& key, const size_t timestamp)
+{
+    if (impl)
+    {
+        return impl->expireat(key, timestamp);
+    }
+    return 0; 
+}
+
+
+cpp_redis_client::StringReply RedisClient::dump(const std::string& key)
+{
+    if (impl)
+    {
+        return impl->dump(key);
+    }
+    return cpp_redis_client::StringReply(boost::shared_ptr<char>(), -1);
+}
+
+
+int RedisClient::pexpireat(const std::string& key, const size_t millisecondsTimestamp)
+{
+    if (impl)
+    {
+        return impl->pexpireat(key, millisecondsTimestamp);
+    }
+    return 0;
+}
+
+
+cpp_redis_client::StringReply RedisClient::randomkey()
+{
+    if (impl)
+    {
+        return impl->randomkey();
+    }
+    return cpp_redis_client::StringReply(boost::shared_ptr<char>(), -1);
 }
 
 

@@ -65,7 +65,7 @@ class RedisClientImpl
         int pexpire(const std::string& key, const size_t milliseconds);
         int pexpireat(const std::string& key, const size_t when);
         int expire(const std::string& key, const size_t seconds);
-        int expireat(const std::string& key, const size_t when);
+        size_t expireat(const std::string& key, const size_t when);
         int incr(const std::string& key);
         int incrby(const std::string& key, const int amount);
         int decr(const std::string& key);
@@ -73,12 +73,12 @@ class RedisClientImpl
         int ttl(const std::string& key);
         int pttl(const std::string& key);
         int persist(const std::string& key);
-        int rename(const std::string& srcKey, const std::string& dstKey);
+        void rename(const std::string& srcKey, const std::string& dstKey);
         int renamenx(const std::string& srcKey, const std::string& dstKey);
         size_t llen(const std::string& key);
-        std::string dump(const std::string& key);
+        cpp_redis_client::StringReply dump(const std::string& key);
         int move(const std::string& key, const size_t db);
-        std::string randomkey();
+        cpp_redis_client::StringReply randomkey();
         int exists(const std::string& key);
         std::string type(const std::string& key);
         std::vector<std::string> keys(const std::string& pattern);
@@ -92,6 +92,7 @@ class RedisClientImpl
         size_t setbit(const std::string& key, const size_t offset, const size_t value);
         void psetex(const std::string& key, const size_t milliseconds, const std::string& value);
         size_t setrange(const std::string& key, const size_t offset, const std::string& value);
+        std::string incrbyfloat(const std::string& key, const float amount);
 
 
     private:
@@ -103,11 +104,13 @@ class RedisClientImpl
         void _sendCommandToRedisServer(const std::string& cmd);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int value);
+        void _sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key, const float value);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const std::string& value);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const size_t num,
                 const std::string& value);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int start,
                 const int end);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::vector<std::string>& keys);
 
         void _recvRedisServerResponse(std::string& response, bool& isNull);
         std::string _recvOneLine();
@@ -117,11 +120,15 @@ class RedisClientImpl
         std::string _readNBitByResponse(const size_t n);
         char _readResponseBeginByte();
         int _readResponseNum();
+        float _readResponseFloatNum();
         std::string _readResponseStr();
         size_t _getReadStreambufSize();
 
         // 整型数字，回复的第一个字节将是“:”
         const size_t _getNumResponse();
+
+        // 浮点数
+        float _getFloatNumResponse();
         
         // 用单行回复，回复的第一个字节将是“+”
         std::string _getOneLineResponse();
@@ -254,6 +261,18 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     boost::asio::write(socket, writeBuf);
 }
 
+void RedisClientImpl::_sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key,
+        const float value)
+{
+    boost::format f = RedisClientImpl::TWO_OPER_FORMAT;
+    const std::string valueStr = boost::lexical_cast<std::string>(value);
+    f % cmd.size() % cmd % key.size() % key % valueStr.size() % valueStr;
+    std::ostream os(&writeBuf);
+    os << f;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, writeBuf);
+}
+
 void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key,
         const std::string& value)
 {
@@ -288,6 +307,29 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     const size_t endLength = _getNumToStrLength(end);
     f % cmd.size() % cmd % key.size() % key % startLength % start % endLength % end;
 
+    std::ostream os(&writeBuf);
+    os << f;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, writeBuf);
+}
+
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::vector<std::string>& keys)
+{
+    assert(keys.size() > 0);
+    std::string send("*%1%\r\n$%2%\r\n%3%\r\n");
+    size_t startPos = 4;
+    for (size_t i = 0; i < keys.size(); ++i)
+    {
+        send += "$%" + boost::lexical_cast<std::string>(4 + i) + "%\r\n";
+        send += "%" + boost::lexical_cast<std::string>(4 + i + 1) + "%\r\n";
+    }
+    std::cout << send << std::endl;
+    boost::format f(send);
+    f % (keys.size() + 1) % cmd.size() % cmd;
+    for (std::vector<std::string>::const_iterator it = keys.begin(); it != keys.end(); ++it)
+    {
+        f % (it->size()) % (*it);
+    }
     std::ostream os(&writeBuf);
     os << f;
     boost::asio::ip::tcp::socket& socket = _getRedisConnect();
@@ -406,6 +448,24 @@ int RedisClientImpl::_readResponseNum()
     }
 
     int num = boost::lexical_cast<int>(response);
+    return num;
+}
+
+float RedisClientImpl::_readResponseFloatNum()
+{
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::read_until(socket, readBuf, "\r\n");
+    std::istream ifs(&readBuf);
+    std::string response;
+    // 读取，默认以\n分隔
+    std::getline(ifs, response);
+    if (response.size() > 0)
+    {
+        // 去掉\r
+        response.pop_back();
+    }
+
+    float num = boost::lexical_cast<float>(response);
     return num;
 }
 
@@ -576,6 +636,32 @@ const size_t RedisClientImpl::_getNumResponse()
     return num;
 }
 
+float RedisClientImpl::_getFloatNumResponse()
+{
+    const char c = _readResponseBeginByte();
+    std::cout << "c : " << c << std::endl;
+    float num = 0;
+    std::string error;
+    switch (c)
+    {
+        case ':':
+            // 读取数字直到\r\n
+            num = _readResponseFloatNum();
+            break;
+        case '-':
+            // 错误
+            error = _readResponseStr();
+            throw std::runtime_error(error);
+            break;
+        default:
+            error = "RedisClient error";
+            throw std::runtime_error(error);
+            break;
+    }
+    return num;
+}
+
+
 std::string RedisClientImpl::_readResponseStr()
 {
     boost::asio::ip::tcp::socket& socket = _getRedisConnect();
@@ -639,7 +725,7 @@ int RedisClientImpl::pexpire(const std::string& key, const size_t milliseconds)
 int RedisClientImpl::pexpireat(const std::string& key, const size_t when)
 {
     _sendCommandToRedisServer("PEXPIREAT", key, when);
-    return 1;
+    return _getNumResponse();
 }
 
 int RedisClientImpl::expire(const std::string& key, const size_t seconds)
@@ -649,10 +735,10 @@ int RedisClientImpl::expire(const std::string& key, const size_t seconds)
     return response;
 }
 
-int RedisClientImpl::expireat(const std::string& key, const size_t when)
+size_t RedisClientImpl::expireat(const std::string& key, const size_t when)
 {
     _sendCommandToRedisServer("EXPIREAT", key, when);
-    return 1;
+    return _getNumResponse();
 }
 
 int RedisClientImpl::setnx(const std::string& key, const std::string& value)
@@ -711,11 +797,10 @@ int RedisClientImpl::persist(const std::string& key)
     return response;
 }
 
-int RedisClientImpl::rename(const std::string& srcKey, const std::string& dstKey)
+void RedisClientImpl::rename(const std::string& srcKey, const std::string& dstKey)
 {
     _sendCommandToRedisServer("RENAME", srcKey, dstKey);
-    int response = _getNumResponse();
-    return response;
+    _getOneLineResponse();
 }
 
 int RedisClientImpl::renamenx(const std::string& srcKey, const std::string& dstKey)
@@ -732,10 +817,12 @@ size_t RedisClientImpl::llen(const std::string& key)
     return response;
 }
 
-std::string RedisClientImpl::dump(const std::string& key)
+cpp_redis_client::StringReply RedisClientImpl::dump(const std::string& key)
 {
     _sendCommandToRedisServer("DUMP", key);
-    return "";
+    int length = 0;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return cpp_redis_client::StringReply(buf, length);
 }
 
 int RedisClientImpl::move(const std::string& key, const size_t db)
@@ -745,10 +832,12 @@ int RedisClientImpl::move(const std::string& key, const size_t db)
     return response;
 }
 
-std::string RedisClientImpl::randomkey()
+cpp_redis_client::StringReply RedisClientImpl::randomkey()
 {
     _sendCommandToRedisServer("RANDOMKEY");
-    return "";
+    int length = 0;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return cpp_redis_client::StringReply(buf, length);
 }
 
 int RedisClientImpl::exists(const std::string& key)
@@ -997,6 +1086,14 @@ size_t RedisClientImpl::setrange(const std::string& key, const size_t offset, co
 {
     _sendCommandToRedisServer("SETRANGE", key, offset, value);
     return _getNumResponse();
+}
+
+std::string RedisClientImpl::incrbyfloat(const std::string& key, const float amount)
+{
+    _sendFloatCommandToRedisServer("INCRBYFLOAT", key, amount);
+    std::string response;
+    _getBulkResponse(response);
+    return response;
 }
 
 
