@@ -31,6 +31,11 @@
 namespace CppRedisClient {
 
 
+StringReply::StringReply() : impl(boost::shared_ptr<StringReplyImpl>())
+{
+}
+
+
 StringReply::StringReply(const boost::shared_ptr<char>& buf, const int length) : 
     impl(new StringReplyImpl(buf, length))
 {

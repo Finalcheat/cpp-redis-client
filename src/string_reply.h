@@ -39,6 +39,7 @@ class StringReply
     friend std::ostream& operator<<(std::ostream& os, const StringReply& reply);
 
     public:
+        explicit StringReply();
         explicit StringReply(const boost::shared_ptr<char>& buf, const int length);
         std::string toString() const;
         int getLength() const;

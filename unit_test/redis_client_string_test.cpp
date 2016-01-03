@@ -191,6 +191,77 @@ BOOST_AUTO_TEST_CASE(incrbyfloat)
 }
 
 
+BOOST_AUTO_TEST_CASE(mget)
+{
+    const std::string key1 = "mget_test_key1";
+    const std::string value1 = "mget_test_key1_value";
+    const std::string key2 = "mget_test_key2";
+    const std::string value2 = "mget_test_key2_value";
+    const std::string key3 = "mget_test_key3";
+    r.set(key1, value1);
+    r.set(key2, value2);
+    std::vector<std::string> keys;
+    keys.push_back(key1);
+    keys.push_back(key3);
+    keys.push_back(key2);
+
+    std::vector<CppRedisClient::StringReply> replys = r.mget(keys);
+    BOOST_REQUIRE(replys.size() == keys.size());
+    BOOST_REQUIRE(replys[0] == value1);
+    BOOST_REQUIRE(replys[1].isNull());
+    BOOST_REQUIRE(replys[2] == value2);
+
+    r.del(key1);
+    r.del(key2);
+}
+
+
+BOOST_AUTO_TEST_CASE(mset)
+{
+    const std::string key1 = "mset_test_key1";
+    const std::string value1 = "mset_test_key1_value1";
+    const std::string key2 = "mset_test_key2";
+    const std::string value2 = "mset_test_key2_value2";
+    std::map<std::string, std::string> kvMap;
+    kvMap[key1] = value1;
+    kvMap[key2] = value2;
+
+    r.mset(kvMap);
+
+    CppRedisClient::StringReply reply = r.get(key1);
+    BOOST_REQUIRE(reply == value1);
+    reply = r.get(key2);
+    BOOST_REQUIRE(reply == value2);
+
+    r.del(key1);
+    r.del(key2);
+}
+
+
+BOOST_AUTO_TEST_CASE(msetnx)
+{
+    const std::string key1 = "msetnx_test_key1";
+    const std::string value1 = "msetnx_test_key1_value1";
+    const std::string key2 = "msetnx_test_key2";
+    const std::string value2 = "msetnx_test_key2_value2";
+    std::map<std::string, std::string> kvMap;
+    kvMap[key1] = value1;
+    kvMap[key2] = value2;
+
+    int num = r.msetnx(kvMap);
+    BOOST_CHECK(num == 1);
+    CppRedisClient::StringReply reply = r.get(key1);
+    BOOST_REQUIRE(reply == value1);
+    reply = r.get(key2);
+    BOOST_REQUIRE(reply == value2); 
+    num = r.msetnx(kvMap);
+    BOOST_CHECK(num == 0);
+
+    r.del(key1);
+    r.del(key2);
+}
+
+
 BOOST_AUTO_TEST_CASE(psetex)
 {
     const std::string key = "psetex_test_key";

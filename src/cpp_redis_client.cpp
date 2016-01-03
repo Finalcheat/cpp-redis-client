@@ -367,6 +367,33 @@ CppRedisClient::StringReply RedisClient::randomkey()
 }
 
 
+std::vector<CppRedisClient::StringReply> RedisClient::mget(const std::vector<std::string>& keys)
+{
+    if (impl)
+    {
+        return impl->mget(keys);
+    }
+    return std::vector<CppRedisClient::StringReply>();
+}
+
+void RedisClient::mset(const std::map<std::string, std::string>& kvMap)
+{
+    if (impl)
+    {
+        impl->mset(kvMap);
+    }
+}
+
+int RedisClient::msetnx(const std::map<std::string, std::string>& kvMap)
+{
+    if (impl)
+    {
+        return impl->msetnx(kvMap);
+    }
+    return 0;
+}
+
+
 
 
 }
