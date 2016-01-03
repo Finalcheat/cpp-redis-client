@@ -75,7 +75,10 @@ std::ostream& operator<<(std::ostream& os, StringReplyImpl& impl)
 {
     const int length = impl.getLength();
     if (length == -1)
+    {
+        os << "NULL";
         return os;
+    }
     char* buf = impl.getBuf();
     char* end = buf + length;
     while (buf != end)
