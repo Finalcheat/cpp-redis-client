@@ -28,7 +28,7 @@
 #include "string_reply_impl.cpp"
 
 
-namespace cpp_redis_client {
+namespace CppRedisClient {
 
 
 StringReply::StringReply(const boost::shared_ptr<char>& buf, const int length) : 

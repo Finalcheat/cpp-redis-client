@@ -7,7 +7,7 @@
 
 BOOST_AUTO_TEST_SUITE(redis_client_keys_test)
 
-cpp_redis_client::RedisClient r("localhost");
+CppRedisClient::RedisClient r("localhost");
 
 
 BOOST_AUTO_TEST_CASE(del)
@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(del)
     const std::string value = "del_test_key_value";
     r.set(key, value);
 
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply == "del_test_key_value");
     BOOST_CHECK(reply.toString() == value);
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(dump)
     const std::string value = "dump_test_key_value";
     r.set(key, value);
 
-    cpp_redis_client::StringReply reply = r.dump(key);
+    CppRedisClient::StringReply reply = r.dump(key);
     // std::cout << reply << std::endl;
     // std::cout << reply.size() << std::endl;
     // std::cout << reply.toString()[0] << std::endl;
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(pttl)
 
 BOOST_AUTO_TEST_CASE(randomkey)
 {
-    cpp_redis_client::StringReply reply = r.randomkey();
+    CppRedisClient::StringReply reply = r.randomkey();
     // std::cout << reply << std::endl;
 }
 
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(rename)
     const std::string renameKey = "rename_test_key_rename";
 
     r.set(key, value);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply == value);
     r.rename(key, renameKey);
     reply = r.get(key);

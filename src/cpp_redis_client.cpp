@@ -30,7 +30,7 @@
 #include <iostream>
 
 
-namespace cpp_redis_client {
+namespace CppRedisClient {
 
 
 RedisClient::RedisClient() : impl(0)
@@ -79,13 +79,13 @@ int RedisClient::setnx(const std::string& key, const std::string& value)
 }
 
 
-cpp_redis_client::StringReply RedisClient::get(const std::string& key)
+CppRedisClient::StringReply RedisClient::get(const std::string& key)
 {
     if (impl)
     {
         return impl->get(key);
     }
-    return cpp_redis_client::StringReply(boost::shared_ptr<char>(), -1);
+    return CppRedisClient::StringReply(boost::shared_ptr<char>(), -1);
 }
 
 const size_t RedisClient::append(const std::string& key, const std::string& value)
@@ -337,13 +337,13 @@ size_t RedisClient::expireat(const std::string& key, const size_t timestamp)
 }
 
 
-cpp_redis_client::StringReply RedisClient::dump(const std::string& key)
+CppRedisClient::StringReply RedisClient::dump(const std::string& key)
 {
     if (impl)
     {
         return impl->dump(key);
     }
-    return cpp_redis_client::StringReply(boost::shared_ptr<char>(), -1);
+    return CppRedisClient::StringReply(boost::shared_ptr<char>(), -1);
 }
 
 
@@ -357,13 +357,13 @@ int RedisClient::pexpireat(const std::string& key, const size_t millisecondsTime
 }
 
 
-cpp_redis_client::StringReply RedisClient::randomkey()
+CppRedisClient::StringReply RedisClient::randomkey()
 {
     if (impl)
     {
         return impl->randomkey();
     }
-    return cpp_redis_client::StringReply(boost::shared_ptr<char>(), -1);
+    return CppRedisClient::StringReply(boost::shared_ptr<char>(), -1);
 }
 
 
@@ -373,9 +373,9 @@ cpp_redis_client::StringReply RedisClient::randomkey()
 
 int test_main()
 {
-    cpp_redis_client::RedisClient r("localhost");
+    CppRedisClient::RedisClient r("localhost");
     {
-        cpp_redis_client::StringReply re = r.get("f");
+        CppRedisClient::StringReply re = r.get("f");
         std::cout << "[" << re.getLength() << "]" << re.toString() << std::endl;
         re = r.get("mykey");
         std::cout << "[" << re.getLength() << "]" << re.toString() << std::endl;
@@ -393,8 +393,8 @@ int test_main()
         std::cout << "[" << re.getLength() << "]" << re.toString() << std::endl;
     }
     // return 0;
-    // cpp_redis_client::RedisClient redis_obj1;
-    cpp_redis_client::RedisClient redis_obj2("localhost");
+    // CppRedisClient::RedisClient redis_obj1;
+    CppRedisClient::RedisClient redis_obj2("localhost");
     // redis_obj2.set("f", "c");
     // redis_obj2.set("c", "f");
     // std::cout << redis_obj2.get("b") << std::endl;

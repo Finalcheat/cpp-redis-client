@@ -33,7 +33,7 @@
 #include <boost/lexical_cast.hpp>
 
 
-namespace cpp_redis_client {
+namespace CppRedisClient {
 
 
 std::string make_string(boost::asio::streambuf& streambuf)
@@ -59,7 +59,7 @@ class RedisClientImpl
         void set(const std::string& key, const std::string& value);
         void setex(const std::string& key, const size_t ttl, const std::string& value);
         int setnx(const std::string& key, const std::string& value);
-        cpp_redis_client::StringReply get(const std::string& key);
+        CppRedisClient::StringReply get(const std::string& key);
         // std::string get(const std::string &key);
         const size_t append(const std::string& key, const std::string& value);
         int pexpire(const std::string& key, const size_t milliseconds);
@@ -76,9 +76,9 @@ class RedisClientImpl
         void rename(const std::string& srcKey, const std::string& dstKey);
         int renamenx(const std::string& srcKey, const std::string& dstKey);
         size_t llen(const std::string& key);
-        cpp_redis_client::StringReply dump(const std::string& key);
+        CppRedisClient::StringReply dump(const std::string& key);
         int move(const std::string& key, const size_t db);
-        cpp_redis_client::StringReply randomkey();
+        CppRedisClient::StringReply randomkey();
         int exists(const std::string& key);
         std::string type(const std::string& key);
         std::vector<std::string> keys(const std::string& pattern);
@@ -817,12 +817,12 @@ size_t RedisClientImpl::llen(const std::string& key)
     return response;
 }
 
-cpp_redis_client::StringReply RedisClientImpl::dump(const std::string& key)
+CppRedisClient::StringReply RedisClientImpl::dump(const std::string& key)
 {
     _sendCommandToRedisServer("DUMP", key);
     int length = 0;
     boost::shared_ptr<char> buf = _getBulkResponse(length);
-    return cpp_redis_client::StringReply(buf, length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 int RedisClientImpl::move(const std::string& key, const size_t db)
@@ -832,12 +832,12 @@ int RedisClientImpl::move(const std::string& key, const size_t db)
     return response;
 }
 
-cpp_redis_client::StringReply RedisClientImpl::randomkey()
+CppRedisClient::StringReply RedisClientImpl::randomkey()
 {
     _sendCommandToRedisServer("RANDOMKEY");
     int length = 0;
     boost::shared_ptr<char> buf = _getBulkResponse(length);
-    return cpp_redis_client::StringReply(buf, length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 int RedisClientImpl::exists(const std::string& key)
@@ -994,12 +994,12 @@ const size_t RedisClientImpl::append(const std::string& key, const std::string& 
 }
 
 
-cpp_redis_client::StringReply RedisClientImpl::get(const std::string& key)
+CppRedisClient::StringReply RedisClientImpl::get(const std::string& key)
 {
     _sendCommandToRedisServer("GET", key);
     int length = -1;
     boost::shared_ptr<char> buf = _getBulkResponse(length);
-    return cpp_redis_client::StringReply(buf, length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 

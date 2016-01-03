@@ -10,7 +10,7 @@ using namespace boost::unit_test;
 BOOST_AUTO_TEST_SUITE(redis_client_string_test) // name of the test suite is stringtest
 
 
-cpp_redis_client::RedisClient r("localhost");
+CppRedisClient::RedisClient r("localhost");
 
 BOOST_AUTO_TEST_CASE(append)
 {
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(get)
     r.set(key1, "value1");
     r.set(key2, "");
 
-    cpp_redis_client::StringReply reply = r.get(key1);
+    CppRedisClient::StringReply reply = r.get(key1);
     BOOST_CHECK(reply.toString() == "value1");
     reply = r.get(key2);
     BOOST_CHECK(reply.toString() == "");
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(getset)
 
     std::string response = r.getset(key, "value");
     BOOST_CHECK(response == value);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.toString() == "value");
 
     r.del(key);
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(psetex)
     const size_t milliseconds = 10 * 1000;
 
     r.psetex(key, milliseconds, value);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.toString() == value);
     int ttl = r.pttl(key);
     BOOST_CHECK(ttl > 0 && ttl <= milliseconds);
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(set)
 
     r.set(key1, value1);
     r.set(key2, value2);
-    cpp_redis_client::StringReply reply = r.get(key1);
+    CppRedisClient::StringReply reply = r.get(key1);
     BOOST_CHECK(reply.toString() == value1);
     reply = r.get(key2);
     BOOST_CHECK(reply.toString() == value2);
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(setbit)
     BOOST_CHECK(bit == 0);
     bit = r.setbit(key, 7, 0);
     BOOST_CHECK(bit == 1);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.size() == 1);
 
     r.del(key);
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(setex)
     r.setex(key, seconds, value);
     int ttl = r.ttl(key);
     BOOST_CHECK(ttl > 0 & ttl <= seconds);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.toString() == value);
 
     r.del(key);
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(setnx)
     BOOST_CHECK(num == 1);
     num = r.setnx(key, "Hello World");
     BOOST_CHECK(num == 0);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.toString() == value);
 
     r.del(key);
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(setrange)
 
     size_t length = r.setrange(key, 6, "Redis");
     BOOST_CHECK(length == 11);
-    cpp_redis_client::StringReply reply = r.get(key);
+    CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.toString() == "Hello Redis");
 
     r.del(key);

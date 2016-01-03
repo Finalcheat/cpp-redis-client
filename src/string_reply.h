@@ -29,7 +29,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace cpp_redis_client {
+namespace CppRedisClient {
 
 
 class StringReplyImpl;

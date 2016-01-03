@@ -33,7 +33,7 @@
 #include <map>
 #include <vector>
 
-namespace cpp_redis_client {
+namespace CppRedisClient {
 
 class RedisClientImpl;
 
@@ -48,7 +48,7 @@ class RedisClient
     // Keys
     public:
         size_t del(const std::string& key);
-        cpp_redis_client::StringReply dump(const std::string& key);
+        CppRedisClient::StringReply dump(const std::string& key);
         int exists(const std::string& key);
         int expire(const std::string& key, const size_t seconds);
         size_t expireat(const std::string& key, const size_t timestamp);
@@ -57,7 +57,7 @@ class RedisClient
         int pexpire(const std::string& key, const size_t milliseconds);
         int pexpireat(const std::string& key, const size_t millisecondsTimestamp);
         int pttl(const std::string& key);
-        cpp_redis_client::StringReply randomkey();
+        CppRedisClient::StringReply randomkey();
         void rename(const std::string& srcKey, const std::string& dstKey);
         int renamenx(const std::string& srcKey, const std::string& dstKey);
         int ttl(const std::string& key);
@@ -69,14 +69,14 @@ class RedisClient
         size_t bitcount(const std::string& key, const int start = 0, const int end = -1);
         int decr(const std::string& key);
         int decrby(const std::string& key, const int amount);
-        cpp_redis_client::StringReply get(const std::string& key);
+        CppRedisClient::StringReply get(const std::string& key);
         size_t getbit(const std::string& key, const size_t offset);
         std::string getrange(const std::string& key, const int start, const int end);
         std::string getset(const std::string& key, const std::string& value);
         int incr(const std::string& key);
         int incrby(const std::string& key, const int amount);
         std::string incrbyfloat(const std::string& key, const float amount);
-        std::vector<cpp_redis_client::StringReply> mget(const std::vector<std::string>& keys);
+        std::vector<CppRedisClient::StringReply> mget(const std::vector<std::string>& keys);
         void mset(const std::map<std::string, std::string>& kvMap);
         int msetnx(const std::map<std::string, std::string>& kvMap);
         void psetex(const std::string &key, const size_t milliseconds, const std::string& value);
