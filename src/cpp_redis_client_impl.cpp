@@ -97,6 +97,24 @@ class RedisClientImpl
         void mset(const std::map<std::string, std::string>& kvMap);
         int msetnx(const std::map<std::string, std::string>& kvMap);
 
+    // hashs
+    public:
+        size_t hdel(const std::string& key, const std::string& field);
+        size_t hdel(const std::string& key, const std::vector<std::string>& fields);
+        size_t hexists(const std::string& key, const std::string& field);
+        CppRedisClient::StringReply hget(const std::string& key, const std::string& field);
+        std::map<std::string, std::string> hgetall(const std::string& key);
+        int hincrby(const std::string& key, const std::string& field, const int amount);
+        std::string hincrbyfloat(const std::string& key, const std::string& field, const float amount);
+        std::vector<std::string> hkeys(const std::string& key);
+        size_t hlen(const std::string& key);
+        CppRedisClient::StringReply hmget(const std::string& key, const std::string& field);
+        std::vector<CppRedisClient::StringReply> hmget(const std::string& key, const std::vector<std::string>& fields);
+        void hmset(const std::string& key, const std::string& field, const std::string& value);
+        void hmset(const std::string& key, const std::map<std::string, std::string>& fvMap);
+        size_t hset(const std::string& key, const std::string& field, const std::string& value);
+        size_t hsetnx(const std::string& key, const std::string& field, const std::string& value);
+        std::vector<std::string> hvals(const std::string& key);
 
     private:
         void _redisConnect();
@@ -115,6 +133,16 @@ class RedisClientImpl
                 const int end);
         void _sendCommandToRedisServer(const std::string& cmd, const std::vector<std::string>& keys);
         void _sendCommandToRedisServer(const std::string& cmd, const std::map<std::string, std::string>& kvMap);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key,
+                const std::map<std::string, std::string>& fvMap);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, 
+                const std::vector<std::string>& fields);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const std::string& field,
+                const int amount);
+        void _sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key, 
+                const std::string& field, const float amount);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const std::string& field,
+                const std::string& value);
 
         void _recvRedisServerResponse(std::string& response, bool& isNull);
         std::string _recvOneLine();
@@ -143,6 +171,8 @@ class RedisClientImpl
 
         // 多批量回复（Multi-bulk replies）
         void _getMultiBulkResponse(std::vector<CppRedisClient::StringReply>& replys);
+        void _getMultiBulkResponse(std::map<std::string, std::string>& replys);
+        void _getMultiBulkResponse(std::vector<std::string>& replys);
 
     private:
         std::string _host;
@@ -306,6 +336,41 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     boost::asio::write(socket, _writeBuf);
 }
 
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key,
+        const std::string& field, const std::string& value)
+{
+    boost::format f = RedisClientImpl::THREE_OPER_FORMAT;
+    f % cmd.size() % cmd % key.size() % key % field.size() % field % value.size() % value;
+    std::ostream os(&_writeBuf);
+    os << f;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key, 
+        const std::string& field, const int amount)
+{
+    boost::format f = RedisClientImpl::THREE_OPER_FORMAT;
+    const size_t numLength = _getNumToStrLength(amount);
+    f % cmd.size() % cmd % key.size() % key % field.size() % field % numLength % amount;
+    std::ostream os(&_writeBuf);
+    os << f;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
+void RedisClientImpl::_sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key,
+        const std::string& field, const float amount)
+{
+    boost::format f = RedisClientImpl::THREE_OPER_FORMAT;
+    std::string amountStr = boost::lexical_cast<std::string>(amount);
+    f % cmd.size() % cmd % key.size() % key % field.size() % field % amountStr.size() % amountStr;
+    std::ostream os(&_writeBuf);
+    os << f;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
 void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int start,
         const int end)
 {
@@ -343,6 +408,31 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     boost::asio::write(socket, _writeBuf);
 }
 
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key,
+        const std::map<std::string, std::string>& fvMap)
+{
+    assert(fvMap.size() > 0);
+    std::string send = "*" + boost::lexical_cast<std::string>(fvMap.size() * 2 + 2) + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(cmd.size()) + "\r\n" +
+        cmd + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(key.size()) + "\r\n" +
+        key + "\r\n";
+    for (std::map<std::string, std::string>::const_iterator it = fvMap.begin(); it != fvMap.end(); ++it)
+    {
+        const std::string& key = it->first;
+        const std::string& value = it->second;
+        send += "$" + boost::lexical_cast<std::string>(key.size()) + "\r\n";
+        send += key + "\r\n";
+        send += "$" + boost::lexical_cast<std::string>(value.size()) + "\r\n";
+        send += value + "\r\n";
+    }
+    // std::cout << send << std::endl;
+    std::ostream os(&_writeBuf);
+    os << send;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
 void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::vector<std::string>& keys)
 {
     assert(keys.size() > 0);
@@ -356,6 +446,26 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
         send += (*it) + "\r\n";
     }
     // std::cout << send << std::endl;
+    std::ostream os(&_writeBuf);
+    os << send;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key,
+        const std::vector<std::string>& fields)
+{
+    assert(fields.size() > 0);
+    std::string send = "*" + boost::lexical_cast<std::string>(fields.size() + 2) + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(cmd.size()) + "\r\n" +
+        cmd + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(key.size()) + "\r\n" +
+        key + "\r\n";
+    for (std::vector<std::string>::const_iterator it = fields.begin(); it != fields.end(); ++it)
+    {
+        send += "$" + boost::lexical_cast<std::string>(it->size()) + "\r\n";
+        send += (*it) + "\r\n";
+    }
     std::ostream os(&_writeBuf);
     os << send;
     boost::asio::ip::tcp::socket& socket = _getRedisConnect();
@@ -379,6 +489,67 @@ void RedisClientImpl::_getMultiBulkResponse(std::vector<CppRedisClient::StringRe
             int length = -1;
             boost::shared_ptr<char> buf = _getBulkResponse(length);
             replys[i] = CppRedisClient::StringReply(buf, length);
+        }
+    }
+    else if (c == '-')
+    {
+        std::string error = _readResponseStr();
+        throw std::runtime_error(error);
+    }
+    else
+    {
+        // _readBuf.consume(_readBuf.size());
+        throw std::runtime_error("RedisClient Error");
+    }
+}
+
+void RedisClientImpl::_getMultiBulkResponse(std::map<std::string, std::string>& replys)
+{
+    const char c = _readResponseBeginByte();
+    if (c == '*')
+    {
+        int num = _readResponseNum();
+        // std::cout << "num : " << num << std::endl;
+        if (num == -1)
+            return;
+        assert(num > 0);
+        for (int i = 0; i < num; i += 2)
+        {
+            std::string key;
+            _getBulkResponse(key);
+            std::string value;
+            _getBulkResponse(value);
+            replys[key] = value;
+        }
+    }
+    else if (c == '-')
+    {
+        std::string error = _readResponseStr();
+        throw std::runtime_error(error);
+    }
+    else
+    {
+        // _readBuf.consume(_readBuf.size());
+        throw std::runtime_error("RedisClient Error");
+    }
+}
+
+void RedisClientImpl::_getMultiBulkResponse(std::vector<std::string>& replys)
+{
+    const char c = _readResponseBeginByte();
+    if (c == '*')
+    {
+        int num = _readResponseNum();
+        // std::cout << "num : " << num << std::endl;
+        if (num == -1)
+            return;
+        assert(num > 0);
+        replys.resize(num);
+        for (int i = 0; i < num; ++i)
+        {
+            std::string key;
+            _getBulkResponse(key);
+            replys[i] = key;
         }
     }
     else if (c == '-')
@@ -1178,5 +1349,141 @@ int RedisClientImpl::msetnx(const std::map<std::string, std::string>& kvMap)
     return _getNumResponse();
 }
 
+size_t RedisClientImpl::hdel(const std::string& key, const std::string& field)
+{
+    _sendCommandToRedisServer("HDEL", key, field);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::hdel(const std::string& key, const std::vector<std::string>& fields)
+{
+    _sendCommandToRedisServer("HDEL", key, fields);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::hexists(const std::string& key, const std::string& field)
+{
+    _sendCommandToRedisServer("HEXISTS", key, field);
+    return _getNumResponse();
+}
+
+CppRedisClient::StringReply RedisClientImpl::hget(const std::string& key, const std::string& field)
+{
+    _sendCommandToRedisServer("HGET", key, field);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
+
+std::map<std::string, std::string> RedisClientImpl::hgetall(const std::string& key)
+{
+    _sendCommandToRedisServer("HGETALL", key);
+    std::map<std::string, std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+int RedisClientImpl::hincrby(const std::string& key, const std::string& field, const int amount)
+{
+    _sendCommandToRedisServer("HINCRBY", key, field, amount);
+    return _getNumResponse();
+}
+
+std::string RedisClientImpl::hincrbyfloat(const std::string& key, const std::string& field, const float amount)
+{
+    _sendFloatCommandToRedisServer("HINCRBYFLOAT", key, field, amount);
+    std::string response;
+    _getBulkResponse(response);
+    return response;
+}
+
+std::vector<std::string> RedisClientImpl::hkeys(const std::string& key)
+{
+    _sendCommandToRedisServer("HKEYS", key);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+size_t RedisClientImpl::hlen(const std::string& key)
+{
+    _sendCommandToRedisServer("HLEN", key);
+    return _getNumResponse();
+}
+
+CppRedisClient::StringReply RedisClientImpl::hmget(const std::string& key, const std::string& field)
+{
+    _sendCommandToRedisServer("HMGET", key, field);
+    // int length = -1;
+    // boost::shared_ptr<char> buf = _getBulkResponse(length);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.size() == 1);
+    return replys[0];
+}
+
+std::vector<CppRedisClient::StringReply> RedisClientImpl::hmget(const std::string& key, const std::vector<std::string>& fields)
+{
+    _sendCommandToRedisServer("HMGET", key, fields);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+void RedisClientImpl::hmset(const std::string& key, const std::string& field, const std::string& value)
+{
+    _sendCommandToRedisServer("HMSET", key, field, value);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+void RedisClientImpl::hmset(const std::string& key, const std::map<std::string, std::string>& fvMap)
+{
+    _sendCommandToRedisServer("HMSET", key, fvMap);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+size_t RedisClientImpl::hset(const std::string& key, const std::string& field, const std::string& value)
+{
+    _sendCommandToRedisServer("HSET", key, field, value);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::hsetnx(const std::string& key, const std::string& field, const std::string& value)
+{
+    _sendCommandToRedisServer("HSETNX", key, field, value);
+    return _getNumResponse();
+}
+
+std::vector<std::string> RedisClientImpl::hvals(const std::string& key)
+{
+    _sendCommandToRedisServer("HVALS", key);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

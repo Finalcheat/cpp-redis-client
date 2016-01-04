@@ -24,6 +24,9 @@
  * @date 2016-01-01
  */
 
+#ifndef STRING_REPLY_CPP
+#define STRING_REPLY_CPP
+
 #include "string_reply.h"
 #include "string_reply_impl.cpp"
 
@@ -93,3 +96,5 @@ std::ostream& operator<<(std::ostream& os, const StringReply& reply)
 
 
 }
+
+#endif

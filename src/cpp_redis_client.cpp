@@ -394,6 +394,128 @@ int RedisClient::msetnx(const std::map<std::string, std::string>& kvMap)
 }
 
 
+size_t RedisClient::hdel(const std::string& key, const std::string& field)
+{
+    if (impl)
+    {
+        return impl->hdel(key, field);
+    }
+    return 0;
+}
+
+size_t RedisClient::hdel(const std::string& key, const std::vector<std::string>& fields)
+{
+    if (impl)
+    {
+        return impl->hdel(key, fields);
+    }
+    return 0;
+}
+
+size_t RedisClient::hexists(const std::string& key, const std::string& field)
+{
+    if (impl)
+    {
+        return impl->hexists(key, field);
+    }
+    return 0;
+}
+
+CppRedisClient::StringReply RedisClient::hget(const std::string& key, const std::string& field)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hget(key, field);
+}
+
+std::map<std::string, std::string> RedisClient::hgetall(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hgetall(key);
+}
+
+int RedisClient::hincrby(const std::string& key, const std::string& field, const int amount)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hincrby(key, field, amount);
+}
+
+std::string RedisClient::hincrbyfloat(const std::string& key, const std::string& field, const float amount)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hincrbyfloat(key, field, amount);
+}
+
+std::vector<std::string> RedisClient::hkeys(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hkeys(key);
+}
+
+size_t RedisClient::hlen(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+    
+    return impl->hlen(key);
+}
+
+CppRedisClient::StringReply RedisClient::hmget(const std::string& key, const std::string& field)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hmget(key, field);
+}
+
+void RedisClient::hmset(const std::string& key, const std::string& field, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hmset(key, field, value);
+}
+
+void RedisClient::hmset(const std::string& key, const std::map<std::string, std::string>& fvMap)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hmset(key, fvMap);
+}
+
+size_t RedisClient::hset(const std::string& key, const std::string& field, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hset(key, field, value);
+}
+
+size_t RedisClient::hsetnx(const std::string& key, const std::string& field, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hsetnx(key, field, value);
+}
+
+std::vector<std::string> RedisClient::hvals(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->hvals(key);
+}
 
 
 }

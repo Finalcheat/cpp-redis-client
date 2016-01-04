@@ -88,6 +88,26 @@ class RedisClient
         size_t strlen(const std::string& key);
 
 
+    // hashs
+    public:
+        size_t hdel(const std::string& key, const std::string& field);
+        size_t hdel(const std::string& key, const std::vector<std::string>& fields);
+        size_t hexists(const std::string& key, const std::string& field);
+        CppRedisClient::StringReply hget(const std::string& key, const std::string& field);
+        std::map<std::string, std::string> hgetall(const std::string& key);
+        int hincrby(const std::string& key, const std::string& field, const int amount);
+        std::string hincrbyfloat(const std::string& key, const std::string& field, const float amount);
+        std::vector<std::string> hkeys(const std::string& key);
+        size_t hlen(const std::string& key);
+        CppRedisClient::StringReply hmget(const std::string& key, const std::string& field);
+        std::vector<CppRedisClient::StringReply> hmget(const std::string& key, const std::vector<std::string>& fields);
+        void hmset(const std::string& key, const std::string& field, const std::string& value);
+        void hmset(const std::string& key, const std::map<std::string, std::string>& fvMap);
+        size_t hset(const std::string& key, const std::string& field, const std::string& value);
+        size_t hsetnx(const std::string& key, const std::string& field, const std::string& value);
+        std::vector<std::string> hvals(const std::string& key);
+
+
     public:
         bool ping();
         size_t llen(const std::string& key);
