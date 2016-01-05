@@ -29,6 +29,8 @@
 #include <boost/format.hpp>
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
 #include <boost/array.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -75,7 +77,6 @@ class RedisClientImpl
         int persist(const std::string& key);
         void rename(const std::string& srcKey, const std::string& dstKey);
         int renamenx(const std::string& srcKey, const std::string& dstKey);
-        size_t llen(const std::string& key);
         CppRedisClient::StringReply dump(const std::string& key);
         int move(const std::string& key, const size_t db);
         CppRedisClient::StringReply randomkey();
@@ -115,6 +116,54 @@ class RedisClientImpl
         size_t hset(const std::string& key, const std::string& field, const std::string& value);
         size_t hsetnx(const std::string& key, const std::string& field, const std::string& value);
         std::vector<std::string> hvals(const std::string& key);
+
+    // lists
+    public:
+        CppRedisClient::StringReply lindex(const std::string& key, const int index);
+        int linsert(const std::string& key, const int flag, const std::string& pivot, const std::string& value);
+        size_t llen(const std::string& key);
+        CppRedisClient::StringReply lpop(const std::string& key);
+        size_t lpush(const std::string& key, const std::string& value);
+        size_t lpush(const std::string& key, const std::vector<std::string>& values);
+        size_t lpushx(const std::string& key, const std::string& value);
+        std::vector<std::string> lrange(const std::string& key, const int start, const int stop);
+        size_t lrem(const std::string& key, const int count, const std::string& value);
+        void lset(const std::string& key, const int index, const std::string& value);
+        void ltrim(const std::string& key, const int start, const int stop);
+        CppRedisClient::StringReply rpop(const std::string& key);
+        CppRedisClient::StringReply rpoplpush(const std::string& srcKey, const std::string& dstKey);
+        size_t rpush(const std::string& key, const std::string& value);
+        size_t rpush(const std::string& key, const std::vector<std::string>& values);
+        size_t rpushx(const std::string& key, const std::string& value);
+
+    // sets
+    public:
+        size_t sadd(const std::string& key, const std::string& member);
+        size_t sadd(const std::string& key, const std::vector<std::string>& members);
+        size_t sadd(const std::string& key, const std::set<std::string>& members);
+        size_t scard(const std::string& key);
+        std::string sdiff(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sdiff(const std::string& key, const std::vector<std::string>& keys);
+        size_t sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
+        size_t sdiffstore(const std::string& dstKey, const std::string& key, const std::vector<string>& keys);
+        std::string sinter(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sinter(const std::string& key, const std::vector<std::string>& keys);
+        size_t sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
+        size_t sinterstore(const std::string& dstKey, const std::string& key, const std::vector<std::string>& keys);
+        int sismember(const std::string& key, const std::string& member);
+        std::vector<std::string> smembers(const std::string& key);
+        int smove(const std::string& sourceKey, const std::string& dstKey, const std::string& member);
+        CppRedisClient::StringReply spop(const std::string& key);
+        CppRedisClient::StringReply srandmember(const std::string& key);
+        std::vector<std::string> srandmember(const std::string& key, const int count);
+        size_t srem(const std::string& key, const std::string& member);
+        size_t srem(const std::string& key, const std::vector<std::string>& members);
+        size_t srem(const std::string& key, const std::set<std::string>& members);
+        std::string sunion(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sunion(const std::string& key, const std::vector<std::string>& keys);
+        size_t sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
+        size_t sunionstore(const std::string& dstKey, const std::string& key, const std::vector<std::string>& keys);
+
 
     private:
         void _redisConnect();
@@ -1041,12 +1090,6 @@ int RedisClientImpl::renamenx(const std::string& srcKey, const std::string& dstK
     return response;
 }
 
-size_t RedisClientImpl::llen(const std::string& key)
-{
-    _sendCommandToRedisServer("LLEN", key);
-    size_t response = _getNumResponse();
-    return response;
-}
 
 CppRedisClient::StringReply RedisClientImpl::dump(const std::string& key)
 {
@@ -1465,6 +1508,121 @@ std::vector<std::string> RedisClientImpl::hvals(const std::string& key)
     _getMultiBulkResponse(replys);
     return replys;
 }
+
+
+
+
+// lists
+CppRedisClient::StringReply RedisClientImpl::lindex(const std::string& key, const int index)
+{
+    _sendCommandToRedisServer("LINDEX", key, index);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert (replys.size() == 1);
+    return replys[0];
+}
+
+size_t RedisClientImpl::llen(const std::string& key)
+{
+    _sendCommandToRedisServer("LLEN", key);
+    size_t response = _getNumResponse();
+    return response;
+}
+
+CppRedisClient::StringReply RedisClientImpl::lpop(const std::string& key)
+{
+    _sendCommandToRedisServer("LPOP", key);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert (replys.size() == 1);
+    return replys[0];
+}
+
+size_t RedisClientImpl::lpush(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("LPUSH", key, value);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::lpush(const std::string& key, const std::vector<std::string>& values)
+{
+    _sendCommandToRedisServer("LPUSH", key, values);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::lpushx(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("LPUSHX", key, value);
+    return _getNumResponse();
+}
+
+std::vector<std::string> RedisClientImpl::lrange(const std::string& key, const int start, const int stop)
+{
+    _sendCommandToRedisServer("LRANGE", key, start, stop);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+size_t RedisClientImpl::lrem(const std::string& key, const int count, const std::string& value)
+{
+    _sendCommandToRedisServer("LREM", key, count, value);
+    return _getNumResponse();
+}
+
+void RedisClientImpl::lset(const std::string& key, const int index, const std::string& value)
+{
+    _sendCommandToRedisServer("LSET", key, index, value);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+void RedisClientImpl::ltrim(const std::string& key, const int start, const int stop)
+{
+    _sendCommandToRedisServer("LTRIM", key, start, stop);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+CppRedisClient::StringReply RedisClientImpl::rpop(const std::string& key)
+{
+    _sendCommandToRedisServer("RPOP", key);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert (replys.size() == 1);
+    return replys[0];
+}
+
+CppRedisClient::StringReply RedisClientImpl::rpoplpush(const std::string& srcKey, const std::string& dstKey)
+{
+    _sendCommandToRedisServer("RPOPLPUSH", srcKey, dstKey);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert (replys.size() == 1);
+    return replys[0];
+}
+
+size_t RedisClientImpl::rpush(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("RPUSH", key, value);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::rpush(const std::string& key, const std::vector<std::string>& values)
+{
+    _sendCommandToRedisServer("RPUSH", key, values);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::rpushx(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("RPUSHX", key, value);
+    return _getNumResponse();
+}
+
+
 
 
 }
