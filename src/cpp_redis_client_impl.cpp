@@ -87,7 +87,6 @@ class RedisClientImpl
         std::string getrange(const std::string& key, const int start, const int end);
         std::string getset(const std::string& key, const std::string& value);
         size_t strlen(const std::string& key);
-        bool ping();
         size_t bitcount(const std::string& key, const int start, const int end);
         size_t del(const std::string& key);
         size_t setbit(const std::string& key, const size_t offset, const size_t value);
@@ -145,11 +144,13 @@ class RedisClientImpl
         std::string sdiff(const std::string& key1, const std::string& key2);
         std::vector<std::string> sdiff(const std::string& key, const std::vector<std::string>& keys);
         size_t sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
-        size_t sdiffstore(const std::string& dstKey, const std::string& key, const std::vector<string>& keys);
+        size_t sdiffstore(const std::string& dstKey, const std::string& key, 
+                const std::vector<std::string>& keys);
         std::string sinter(const std::string& key1, const std::string& key2);
         std::vector<std::string> sinter(const std::string& key, const std::vector<std::string>& keys);
         size_t sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
-        size_t sinterstore(const std::string& dstKey, const std::string& key, const std::vector<std::string>& keys);
+        size_t sinterstore(const std::string& dstKey, const std::string& key, 
+                const std::vector<std::string>& keys);
         int sismember(const std::string& key, const std::string& member);
         std::vector<std::string> smembers(const std::string& key);
         int smove(const std::string& sourceKey, const std::string& dstKey, const std::string& member);
@@ -162,7 +163,35 @@ class RedisClientImpl
         std::string sunion(const std::string& key1, const std::string& key2);
         std::vector<std::string> sunion(const std::string& key, const std::vector<std::string>& keys);
         size_t sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
-        size_t sunionstore(const std::string& dstKey, const std::string& key, const std::vector<std::string>& keys);
+        size_t sunionstore(const std::string& dstKey, const std::string& key, 
+                const std::vector<std::string>& keys);
+
+    // sorted sets
+    public:
+        size_t zadd(const std::string& key, const int score, const std::string& member);
+        size_t zcard(const std::string& key);
+        size_t zcount(const std::string& key, const int min, const int max);
+        std::string zincrby(const std::string& key, const int increment, const std::string& member);
+        std::vector<std::string> zrange(const std::string& key, const int start, const int stop);
+        std::vector<std::string> zrangebyscore(const std::string& key, const int min, const int max);
+        CppRedisClient::StringReply zrank(const std::string& key, const std::string& member);
+        size_t zrem(const std::string& key, const std::string& member);
+        size_t zrem(const std::string& key, const std::vector<std::string>& members);
+        size_t zremrangebyrank(const std::string& key, const int start, const int stop);
+        size_t zremrangebyscore(const std::string& key, const int min, const int max);
+        std::vector<std::string> zrevrange(const std::string& key, const int start, const int stop);
+        std::vector<std::string> zrevrangebyscore(const std::string& key, const int max, const int min);
+        CppRedisClient::StringReply zrevrank(const std::string& key, const std::string& member);
+        CppRedisClient::StringReply zscore(const std::string& key, const std::string& member);
+
+    // connection
+    public:
+        bool auth(const std::string& password = "");
+        CppRedisClient::StringReply echo(const std::string& message);
+        bool ping();
+        void quit();
+        void select(const size_t index);
+
 
 
     private:
@@ -172,6 +201,7 @@ class RedisClientImpl
         size_t _getNumToStrLength(const int num) const;
 
         void _sendCommandToRedisServer(const std::string& cmd);
+        void _sendCommandToRedisServer(const std::string& cmd, const size_t index);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int value);
         void _sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key, const float value);
@@ -186,6 +216,10 @@ class RedisClientImpl
                 const std::map<std::string, std::string>& fvMap);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, 
                 const std::vector<std::string>& fields);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& dstKey,
+                const std::string& key, const std::vector<std::string>& keys);
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key,
+                const std::set<std::string>& members);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const std::string& field,
                 const int amount);
         void _sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key, 
@@ -316,6 +350,17 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd)
     std::ostream os(&_writeBuf);
     os << f;
 
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const size_t index)
+{
+    boost::format f = RedisClientImpl::ONE_OPER_FORMAT;
+    const size_t indexLength = _getNumToStrLength(index);
+    f % cmd.size() % cmd % indexLength % index;
+    std::ostream os(&_writeBuf);
+    os << f;
     boost::asio::ip::tcp::socket& socket = _getRedisConnect();
     boost::asio::write(socket, _writeBuf);
 }
@@ -501,6 +546,27 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     boost::asio::write(socket, _writeBuf);
 }
 
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& dstKey,
+        const std::string& key, const std::vector<std::string>& keys)
+{
+    std::string send = "*" + boost::lexical_cast<std::string>(keys.size() + 3) + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(cmd.size()) + "\r\n" +
+        cmd + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(dstKey.size()) + "\r\n" +
+        dstKey + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(key.size()) + "\r\n" +
+        key + "\r\n";
+    for (std::vector<std::string>::const_iterator it = keys.begin(); it != keys.end(); ++it)
+    {
+        send += "$" + boost::lexical_cast<std::string>(it->size()) + "\r\n"; 
+        send += (*it) + "\r\n";
+    }
+    std::ostream os(&_writeBuf);
+    os << send;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
 void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key,
         const std::vector<std::string>& fields)
 {
@@ -511,6 +577,26 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
         "$" + boost::lexical_cast<std::string>(key.size()) + "\r\n" +
         key + "\r\n";
     for (std::vector<std::string>::const_iterator it = fields.begin(); it != fields.end(); ++it)
+    {
+        send += "$" + boost::lexical_cast<std::string>(it->size()) + "\r\n";
+        send += (*it) + "\r\n";
+    }
+    std::ostream os(&_writeBuf);
+    os << send;
+    boost::asio::ip::tcp::socket& socket = _getRedisConnect();
+    boost::asio::write(socket, _writeBuf);
+}
+
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key,
+        const std::set<std::string>& members)
+{
+    assert(members.size() > 0);
+    std::string send = "*" + boost::lexical_cast<std::string>(members.size() + 2) + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(cmd.size()) + "\r\n" +
+        cmd + "\r\n" +
+        "$" + boost::lexical_cast<std::string>(key.size()) + "\r\n" +
+        key + "\r\n";
+    for (std::set<std::string>::const_iterator it = members.begin(); it != members.end(); ++it)
     {
         send += "$" + boost::lexical_cast<std::string>(it->size()) + "\r\n";
         send += (*it) + "\r\n";
@@ -1163,12 +1249,6 @@ std::string RedisClientImpl::getrange(const std::string& key, const int start, c
     return response;
 }
 
-bool RedisClientImpl::ping()
-{
-    _sendCommandToRedisServer("PING");
-    std::string response = _getOneLineResponse();
-    return response == "PONG";
-}
 
 void RedisClientImpl::_redisConnect()
 {
@@ -1621,6 +1701,348 @@ size_t RedisClientImpl::rpushx(const std::string& key, const std::string& value)
     _sendCommandToRedisServer("RPUSHX", key, value);
     return _getNumResponse();
 }
+
+
+// sets
+size_t RedisClientImpl::sadd(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("SADD", key, member);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::sadd(const std::string& key, const std::vector<std::string>& members)
+{
+    _sendCommandToRedisServer("SADD", key, members);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::sadd(const std::string& key, const std::set<std::string>& members)
+{
+    _sendCommandToRedisServer("SADD", key, members);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::scard(const std::string& key)
+{
+    _sendCommandToRedisServer("SCARD", key);
+    return _getNumResponse();
+}
+
+std::string RedisClientImpl::sdiff(const std::string& key1, const std::string& key2)
+{
+    _sendCommandToRedisServer("SDIFF", key1, key2);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.empty() or replys.size() == 1);
+    if (replys.empty())
+        return std::string();
+    else
+        return replys[0];
+}
+
+std::vector<std::string> RedisClientImpl::sdiff(const std::string& key, const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("SDIFF", key, keys);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+size_t RedisClientImpl::sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
+{
+    _sendCommandToRedisServer("SDIFFSTORE", dstKey, key1, key2);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::sdiffstore(const std::string& dstKey, const std::string& key, 
+        const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("SDIFFSTORE", dstKey, key, keys);
+    return _getNumResponse();
+}
+
+std::string RedisClientImpl::sinter(const std::string& key1, const std::string& key2)
+{
+    _sendCommandToRedisServer("SINTER", key1, key2);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.empty() or replys.size() == 1);
+    if (replys.empty())
+        return std::string();
+    else
+        return replys[0];
+}
+
+std::vector<std::string> RedisClientImpl::sinter(const std::string& key, const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("SINTER", key, keys);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+size_t RedisClientImpl::sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
+{
+    _sendCommandToRedisServer("SINTERSTORE", dstKey, key1, key2);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::sinterstore(const std::string& dstKey, const std::string& key, 
+        const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("SINTERSTORE", dstKey, key, keys);
+    return _getNumResponse();
+}
+
+int RedisClientImpl::sismember(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("SISMEMBER", key, member);
+    return _getNumResponse();
+}
+
+std::vector<std::string> RedisClientImpl::smembers(const std::string& key)
+{
+    _sendCommandToRedisServer("SMEMBERS", key);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+int RedisClientImpl::smove(const std::string& sourceKey, const std::string& dstKey, const std::string& member)
+{
+    _sendCommandToRedisServer("SMOVE", sourceKey, dstKey, member);
+    return _getNumResponse();
+}
+
+CppRedisClient::StringReply RedisClientImpl::spop(const std::string& key)
+{
+    _sendCommandToRedisServer("SPOP", key);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.size() == 1);
+    return replys[0];
+}
+
+CppRedisClient::StringReply RedisClientImpl::srandmember(const std::string& key)
+{
+    _sendCommandToRedisServer("SRANDMEMBER", key);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.size() == 1);
+    return replys[0];
+}
+
+std::vector<std::string> RedisClientImpl::srandmember(const std::string& key, const int count)
+{
+    _sendCommandToRedisServer("SRANDMEMBER", key, count);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+size_t RedisClientImpl::srem(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("SREM", key, member);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::srem(const std::string& key, const std::vector<std::string>& members)
+{
+    _sendCommandToRedisServer("SREM", key, members);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::srem(const std::string& key, const std::set<std::string>& members)
+{
+    _sendCommandToRedisServer("SREM", key, members);
+    return _getNumResponse();
+}
+
+std::string RedisClientImpl::sunion(const std::string& key1, const std::string& key2)
+{
+    _sendCommandToRedisServer("SUNION", key1, key2);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.empty() or replys.size() == 1);
+    if (replys.empty())
+        return std::string();
+    else
+        return replys[0];
+}
+
+std::vector<std::string> RedisClientImpl::sunion(const std::string& key, const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("SUNION", key, keys);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+size_t RedisClientImpl::sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
+{
+    _sendCommandToRedisServer("SUNIONSTORE", dstKey, key1, key2);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::sunionstore(const std::string& dstKey, const std::string& key, 
+        const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("SUNIONSTORE", dstKey, key, keys);
+    return _getNumResponse();
+}
+
+
+// sorted sets
+size_t RedisClientImpl::zadd(const std::string& key, const int score, const std::string& member)
+{
+    _sendCommandToRedisServer("ZADD", key, score, member);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::zcard(const std::string& key)
+{
+    _sendCommandToRedisServer("ZCARD", key);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::zcount(const std::string& key, const int min, const int max)
+{
+    _sendCommandToRedisServer("ZCOUNT", key, min, max);
+    return _getNumResponse();
+}
+
+std::string RedisClientImpl::zincrby(const std::string& key, const int increment, const std::string& member)
+{
+    _sendCommandToRedisServer("ZINCYBY", key, increment, member);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    assert(replys.size() == 1);
+    return replys[0];
+}
+
+std::vector<std::string> RedisClientImpl::zrange(const std::string& key, const int start, const int stop)
+{
+    _sendCommandToRedisServer("ZRANGE", key, start, stop);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+std::vector<std::string> RedisClientImpl::zrangebyscore(const std::string& key, const int min, const int max)
+{
+    _sendCommandToRedisServer("ZRANGEBYSCORE", key, min, max);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+CppRedisClient::StringReply RedisClientImpl::zrank(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("ZRANK", key, member);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
+
+size_t RedisClientImpl::zrem(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("ZREM", key, member);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::zrem(const std::string& key, const std::vector<std::string>& members)
+{
+    _sendCommandToRedisServer("ZREM", key, members);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::zremrangebyrank(const std::string& key, const int start, const int stop)
+{
+    _sendCommandToRedisServer("ZREMRANGEBYRANK", key, start, stop);
+    return _getNumResponse();
+}
+
+size_t RedisClientImpl::zremrangebyscore(const std::string& key, const int min, const int max)
+{
+    _sendCommandToRedisServer("ZREMRANGEBYSCORE", key, min, max);
+    return _getNumResponse();
+}
+
+std::vector<std::string> RedisClientImpl::zrevrange(const std::string& key, const int start, const int stop)
+{
+    _sendCommandToRedisServer("ZREVRANGE", key, start, stop);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+std::vector<std::string> RedisClientImpl::zrevrangebyscore(const std::string& key, const int max, const int min)
+{
+    _sendCommandToRedisServer("ZREVRANGEBYSCORE", key, max, min);
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+CppRedisClient::StringReply RedisClientImpl::zrevrank(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("ZREVRANK", key, member);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
+
+CppRedisClient::StringReply RedisClientImpl::zscore(const std::string& key, const std::string& member)
+{
+    _sendCommandToRedisServer("zscore", key, member);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
+
+
+// connection
+bool RedisClientImpl::auth(const std::string& password)
+{
+    _sendCommandToRedisServer("AUTH", password);
+    std::string response = _getOneLineResponse();
+    return response == "OK";
+}
+
+CppRedisClient::StringReply RedisClientImpl::echo(const std::string& message)
+{
+    _sendCommandToRedisServer("ECHO", message);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
+
+bool RedisClientImpl::ping()
+{
+    _sendCommandToRedisServer("PING");
+    std::string response = _getOneLineResponse();
+    return response == "PONG";
+}
+
+void RedisClientImpl::quit()
+{
+    _sendCommandToRedisServer("QUIT");
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return;
+} 
+
+void RedisClientImpl::select(const size_t index)
+{
+    _sendCommandToRedisServer("SELECT", index);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return;
+}
+
+
+
+
 
 
 
