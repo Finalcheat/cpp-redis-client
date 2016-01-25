@@ -89,6 +89,25 @@ class RedisClient
         size_t hsetnx(const std::string& key, const std::string& field, const std::string& value);
         std::vector<std::string> hvals(const std::string& key);
 
+    // lists
+    public:
+        CppRedisClient::StringReply lindex(const std::string& key, const int index);
+        int linsert(const std::string& key, const int flag, const std::string& pivot, const std::string& value);
+        size_t llen(const std::string& key);
+        CppRedisClient::StringReply lpop(const std::string& key);
+        size_t lpush(const std::string& key, const std::string& value);
+        size_t lpush(const std::string& key, const std::vector<std::string>& values);
+        size_t lpushx(const std::string& key, const std::string& value);
+        std::vector<std::string> lrange(const std::string& key, const int start, const int stop);
+        size_t lrem(const std::string& key, const int count, const std::string& value);
+        void lset(const std::string& key, const int index, const std::string& value);
+        void ltrim(const std::string& key, const int start, const int stop);
+        CppRedisClient::StringReply rpop(const std::string& key);
+        CppRedisClient::StringReply rpoplpush(const std::string& srcKey, const std::string& dstKey);
+        size_t rpush(const std::string& key, const std::string& value);
+        size_t rpush(const std::string& key, const std::vector<std::string>& values);
+        size_t rpushx(const std::string& key, const std::string& value);
+
 
     public:
         bool ping();

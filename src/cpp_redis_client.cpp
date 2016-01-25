@@ -500,6 +500,139 @@ std::vector<std::string> RedisClient::hvals(const std::string& key)
 }
 
 
+// lists
+CppRedisClient::StringReply RedisClient::lindex(const std::string& key, const int index)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lindex(key, index);
+}
+
+int RedisClient::linsert(const std::string& key, const int flag, const std::string& pivot, 
+        const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->linsert(key, flag, pivot, value);
+}
+
+size_t RedisClient::llen(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->llen(key);
+}
+
+CppRedisClient::StringReply RedisClient::lpop(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lpop(key);
+}
+
+size_t RedisClient::lpush(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lpush(key, value);
+}
+
+size_t RedisClient::lpush(const std::string& key, const std::vector<std::string>& values)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lpush(key, values);
+}
+
+size_t RedisClient::lpushx(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lpushx(key, value);
+}
+
+
+std::vector<std::string> RedisClient::lrange(const std::string& key, const int start, const int stop)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lrange(key, start, stop);
+}
+
+size_t RedisClient::lrem(const std::string& key, const int count, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lrem(key, count, value);
+}
+
+void RedisClient::lset(const std::string& key, const int index, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("Error!");
+
+    return impl->lset(key, index, value);
+}
+
+void RedisClient::ltrim(const std::string& key, const int start, const int stop)
+{
+    if (!impl)
+        throw std::runtime_error("Ltrim Error!");
+
+    return impl->ltrim(key, start, stop);
+}
+
+CppRedisClient::StringReply RedisClient::rpop(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::rpop Error!");
+
+    return impl->rpop(key);
+}
+
+CppRedisClient::StringReply RedisClient::rpoplpush(const std::string& srcKey, const std::string& dstKey)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::rpoplpush Error!");
+
+    return impl->rpoplpush(srcKey, dstKey);
+}
+
+size_t RedisClient::rpush(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::rpush Error!");
+
+    return impl->rpush(key, value);
+}
+
+size_t RedisClient::rpush(const std::string& key, const std::vector<std::string>& values)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::rpush Error!");
+
+    return impl->rpush(key, values);
+}
+
+size_t RedisClient::rpushx(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::rpushx Error!");
+
+    return impl->rpushx(key, value);
+}
+
+
+
 }
 
 int test_main()
