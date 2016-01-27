@@ -108,6 +108,37 @@ class RedisClient
         size_t rpush(const std::string& key, const std::vector<std::string>& values);
         size_t rpushx(const std::string& key, const std::string& value);
 
+    // sets
+    public:
+        size_t sadd(const std::string& key, const std::string& member);
+        size_t sadd(const std::string& key, const std::vector<std::string>& members);
+        size_t sadd(const std::string& key, const std::set<std::string>& members);
+        size_t scard(const std::string& key);
+        std::string sdiff(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sdiff(const std::string& key, const std::vector<std::string>& keys);
+        size_t sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
+        size_t sdiffstore(const std::string& dstKey, const std::string& key, 
+                const std::vector<std::string>& keys);
+        std::string sinter(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sinter(const std::string& key, const std::vector<std::string>& keys);
+        size_t sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
+        size_t sinterstore(const std::string& dstKey, const std::string& key, 
+                const std::vector<std::string>& keys);
+        int sismember(const std::string& key, const std::string& member);
+        std::vector<std::string> smembers(const std::string& key);
+        int smove(const std::string& sourceKey, const std::string& dstKey, const std::string& member);
+        CppRedisClient::StringReply spop(const std::string& key);
+        CppRedisClient::StringReply srandmember(const std::string& key);
+        std::vector<std::string> srandmember(const std::string& key, const int count);
+        size_t srem(const std::string& key, const std::string& member);
+        size_t srem(const std::string& key, const std::vector<std::string>& members);
+        size_t srem(const std::string& key, const std::set<std::string>& members);
+        std::string sunion(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sunion(const std::string& key, const std::vector<std::string>& keys);
+        size_t sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
+        size_t sunionstore(const std::string& dstKey, const std::string& key, 
+                const std::vector<std::string>& keys);
+
 
     public:
         bool ping();

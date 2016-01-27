@@ -632,6 +632,211 @@ size_t RedisClient::rpushx(const std::string& key, const std::string& value)
 }
 
 
+// sets
+size_t RedisClient::sadd(const std::string& key, const std::string& member)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sadd Error!");
+
+    return impl->sadd(key, member);
+}
+
+size_t RedisClient::sadd(const std::string& key, const std::vector<std::string>& members)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sadd Error!");
+
+    return impl->sadd(key, members);
+}
+
+size_t RedisClient::sadd(const std::string& key, const std::set<std::string>& members)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sadd Error!");
+
+    return impl->sadd(key, members);
+}
+
+size_t RedisClient::scard(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::scard Error!");
+
+    return impl->scard(key);
+}
+
+std::string RedisClient::sdiff(const std::string& key1, const std::string& key2)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sdiff Error!");
+
+    return impl->sdiff(key1, key2);
+}
+
+std::vector<std::string> RedisClient::sdiff(const std::string& key, const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sdiff Error!");
+
+    return impl->sdiff(key, keys);
+}
+
+size_t RedisClient::sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sdiffstore Error!");
+
+    return impl->sdiffstore(dstKey, key1, key2);
+}
+
+size_t RedisClient::sdiffstore(const std::string& dstKey, const std::string& key,
+        const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sdiffstore Error!");
+
+    return impl->sdiffstore(dstKey, key, keys);
+}
+
+std::string RedisClient::sinter(const std::string& key1, const std::string& key2)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sinter Error!");
+
+    return impl->sinter(key1, key2);
+}
+
+std::vector<std::string> RedisClient::sinter(const std::string& key, const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sinter Error!");
+
+    return impl->sinter(key, keys);
+}
+
+size_t RedisClient::sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sinterstore Error!");
+
+    return impl->sinterstore(dstKey, key1, key2);
+}
+
+size_t RedisClient::sinterstore(const std::string& dstKey, const std::string& key, 
+        const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sinterstore Error!");
+
+    return impl->sinterstore(dstKey, key, keys);
+}
+
+int RedisClient::sismember(const std::string& key, const std::string& member)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sismember Error!");
+
+    return impl->sismember(key, member);
+}
+
+std::vector<std::string> RedisClient::smembers(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::smembers Error!");
+
+    return impl->smembers(key);
+}
+
+int RedisClient::smove(const std::string& sourceKey, const std::string& dstKey, const std::string& member)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::smove Error!");
+
+    return impl->smove(sourceKey, dstKey, member);
+}
+
+CppRedisClient::StringReply RedisClient::spop(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::spop Error!");
+
+    return impl->spop(key);
+}
+
+CppRedisClient::StringReply RedisClient::srandmember(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::srandmember Error!");
+
+    return impl->srandmember(key);
+}
+
+std::vector<std::string> RedisClient::srandmember(const std::string& key, const int count)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::srandmember Error!");
+
+    return impl->srandmember(key, count);
+}
+
+size_t RedisClient::srem(const std::string& key, const std::string& member)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::srem Error!");
+
+    return impl->srem(key, member);
+}
+
+size_t RedisClient::srem(const std::string& key, const std::vector<std::string>& members)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::srem Error!");
+
+    return impl->srem(key, members);
+}
+
+size_t RedisClient::srem(const std::string& key, const std::set<std::string>& members)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::srem Error!");
+
+    return impl->srem(key, members);
+}
+
+std::string RedisClient::sunion(const std::string& key1, const std::string& key2)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sunion Error!");
+
+    return impl->sunion(key1, key2);
+}
+
+std::vector<std::string> RedisClient::sunion(const std::string& key, const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sunion Error!");
+
+    return impl->sunion(key, keys);
+}
+
+size_t RedisClient::sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sunionstore Error!");
+
+    return impl->sunionstore(dstKey, key1, key2);
+}
+
+size_t RedisClient::sunionstore(const std::string& dstKey, const std::string& key, 
+        const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::sunionstore Error!");
+
+    return impl->sunionstore(dstKey, key, keys);
+}
+
+
 
 }
 
