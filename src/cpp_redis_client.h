@@ -139,6 +139,24 @@ class RedisClient
         size_t sunionstore(const std::string& dstKey, const std::string& key, 
                 const std::vector<std::string>& keys);
 
+    // sorted sets
+    public:
+        size_t zadd(const std::string& key, const int score, const std::string& member);
+        size_t zcard(const std::string& key);
+        size_t zcount(const std::string& key, const int min, const int max);
+        std::string zincrby(const std::string& key, const int increment, const std::string& member);
+        std::vector<std::string> zrange(const std::string& key, const int start, const int stop);
+        std::vector<std::string> zrangebyscore(const std::string& key, const int min, const int max);
+        CppRedisClient::StringReply zrank(const std::string& key, const std::string& member);
+        size_t zrem(const std::string& key, const std::string& member);
+        size_t zrem(const std::string& key, const std::vector<std::string>& members);
+        size_t zremrangebyrank(const std::string& key, const int start, const int stop);
+        size_t zremrangebyscore(const std::string& key, const int min, const int max);
+        std::vector<std::string> zrevrange(const std::string& key, const int start, const int stop);
+        std::vector<std::string> zrevrangebyscore(const std::string& key, const int max, const int min);
+        CppRedisClient::StringReply zrevrank(const std::string& key, const std::string& member);
+        CppRedisClient::StringReply zscore(const std::string& key, const std::string& member);
+
 
     public:
         bool ping();
