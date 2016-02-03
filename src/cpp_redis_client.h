@@ -13,6 +13,7 @@
 #include "string_reply.h"
 #include <string>
 #include <map>
+#include <set>
 #include <vector>
 
 namespace CppRedisClient {
@@ -160,7 +161,6 @@ class RedisClient
 
     public:
         bool ping();
-        size_t llen(const std::string& key);
 
         // std::string get(const std::string& key) const;
 
