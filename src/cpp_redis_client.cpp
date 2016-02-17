@@ -35,53 +35,37 @@ RedisClient::~RedisClient()
     }
 }
 
-void RedisClient::set(const std::string& key, const std::string& value)
+bool RedisClient::ping()
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::set Error!");
+        throw std::runtime_error("RedisClient::ping Error!");
 
-    return impl->set(key, value);
+    return impl->ping();
 }
 
-void RedisClient::setex(const std::string& key, const size_t ttl, const std::string& value)
+// Keys
+size_t RedisClient::del(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::setex Error!");
+        throw std::runtime_error("RedisClient::del Error!");
 
-    return impl->setex(key, ttl, value);
+    return impl->del(key);
 }
 
-int RedisClient::setnx(const std::string& key, const std::string& value)
+CppRedisClient::StringReply RedisClient::dump(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::setnx Error!");
+        throw std::runtime_error("RedisClient::dump Error!");
 
-    return impl->setnx(key, value);
+    return impl->dump(key);
 }
 
-
-CppRedisClient::StringReply RedisClient::get(const std::string& key)
+int RedisClient::exists(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::get Error!");
+        throw std::runtime_error("RedisClient::exists Error!");
 
-    return impl->get(key);
-}
-
-const size_t RedisClient::append(const std::string& key, const std::string& value)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::append Error!");
-
-    return impl->append(key, value);
-}
-
-int RedisClient::pexpire(const std::string& key, const size_t milliseconds)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::pexpire Error!");
-
-    return impl->pexpire(key, milliseconds);
+    return impl->exists(key);
 }
 
 int RedisClient::expire(const std::string& key, const size_t seconds)
@@ -92,68 +76,44 @@ int RedisClient::expire(const std::string& key, const size_t seconds)
     return impl->expire(key, seconds);
 }
 
-size_t RedisClient::getbit(const std::string& key, const size_t offset)
+size_t RedisClient::expireat(const std::string& key, const size_t timestamp)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::getbit Error!");
+        throw std::runtime_error("RedisClient::expireat Error!");
 
-    return impl->getbit(key, offset);
+    return impl->expireat(key, timestamp);
 }
 
-int RedisClient::incr(const std::string& key)
+int RedisClient::move(const std::string& key, const size_t db)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::incr Error!");
+        throw std::runtime_error("RedisClient::move Error!");
 
-    return impl->incr(key);
+    return impl->move(key, db);
 }
 
-std::string RedisClient::getrange(const std::string& key, const int start, const int end)
+int RedisClient::persist(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::getrange Error!");
+        throw std::runtime_error("RedisClient::persist Error!");
 
-    return impl->getrange(key, start, end);
+    return impl->persist(key);
 }
 
-int RedisClient::incrby(const std::string& key, const int amount)
+int RedisClient::pexpire(const std::string& key, const size_t milliseconds)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::incrby Error!");
+        throw std::runtime_error("RedisClient::pexpire Error!");
 
-    return impl->incrby(key, amount);
+    return impl->pexpire(key, milliseconds);
 }
 
-int RedisClient::decr(const std::string& key)
+int RedisClient::pexpireat(const std::string& key, const size_t millisecondsTimestamp)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::decr Error!");
+        throw std::runtime_error("RedisClient::pexpireat Error!");
 
-    return impl->decr(key);
-}
-
-int RedisClient::decrby(const std::string& key, const int amount)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::decrby Error!");
-
-    return impl->decrby(key, amount);
-}
-
-size_t RedisClient::strlen(const std::string& key)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::strlen Error!");
-
-    return impl->strlen(key);
-}
-
-int RedisClient::ttl(const std::string& key)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::ttl Error!");
-
-    return impl->ttl(key);
+    return impl->pexpireat(key, millisecondsTimestamp);
 }
 
 int RedisClient::pttl(const std::string& key)
@@ -164,29 +124,12 @@ int RedisClient::pttl(const std::string& key)
     return impl->pttl(key);
 }
 
-std::string RedisClient::getset(const std::string& key, const std::string& value)
+CppRedisClient::StringReply RedisClient::randomkey()
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::getset Error!");
+        throw std::runtime_error("RedisClient::randomkey Error!");
 
-    return impl->getset(key, value);
-}
-
-
-bool RedisClient::ping()
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::ping Error!");
-
-    return impl->ping();
-}
-
-int RedisClient::persist(const std::string& key)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::persist Error!");
-
-    return impl->persist(key);
+    return impl->randomkey();
 }
 
 void RedisClient::rename(const std::string& srcKey, const std::string& dstKey)
@@ -205,22 +148,23 @@ int RedisClient::renamenx(const std::string& srcKey, const std::string& dstKey)
     return impl->renamenx(srcKey, dstKey);
 }
 
-int RedisClient::move(const std::string& key, const size_t db)
+int RedisClient::ttl(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::move Error!");
+        throw std::runtime_error("RedisClient::ttl Error!");
 
-    return impl->move(key, db);
+    return impl->ttl(key);
 }
 
-int RedisClient::exists(const std::string& key)
+
+// String
+const size_t RedisClient::append(const std::string& key, const std::string& value)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::exists Error!");
+        throw std::runtime_error("RedisClient::append Error!");
 
-    return impl->exists(key);
+    return impl->append(key, value);
 }
-
 
 size_t RedisClient::bitcount(const std::string& key, const int start, const int end)
 {
@@ -230,39 +174,68 @@ size_t RedisClient::bitcount(const std::string& key, const int start, const int 
     return impl->bitcount(key, start, end);
 }
 
-
-size_t RedisClient::del(const std::string& key)
+int RedisClient::decr(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::del Error!");
+        throw std::runtime_error("RedisClient::decr Error!");
 
-    return impl->del(key);
+    return impl->decr(key);
 }
 
-
-size_t RedisClient::setbit(const std::string& key, const size_t offset, const size_t value)
+int RedisClient::decrby(const std::string& key, const int amount)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::setbit Error!");
+        throw std::runtime_error("RedisClient::decrby Error!");
 
-    return impl->setbit(key, offset, value);
+    return impl->decrby(key, amount);
 }
 
-
-void RedisClient::psetex(const std::string& key, const size_t milliseconds, const std::string& value)
+CppRedisClient::StringReply RedisClient::get(const std::string& key)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::psetex Error!");
+        throw std::runtime_error("RedisClient::get Error!");
 
-    return impl->psetex(key, milliseconds, value);
+    return impl->get(key);
 }
 
-size_t RedisClient::setrange(const std::string& key, const size_t offset, const std::string& value)
+size_t RedisClient::getbit(const std::string& key, const size_t offset)
 {
     if (!impl)
-        throw std::runtime_error("RedisClient::setrange Error!");
+        throw std::runtime_error("RedisClient::getbit Error!");
 
-    return impl->setrange(key, offset, value);
+    return impl->getbit(key, offset);
+}
+
+std::string RedisClient::getrange(const std::string& key, const int start, const int end)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::getrange Error!");
+
+    return impl->getrange(key, start, end);
+}
+
+std::string RedisClient::getset(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::getset Error!");
+
+    return impl->getset(key, value);
+}
+
+int RedisClient::incr(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::incr Error!");
+
+    return impl->incr(key);
+}
+
+int RedisClient::incrby(const std::string& key, const int amount)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::incrby Error!");
+
+    return impl->incrby(key, amount);
 }
 
 std::string RedisClient::incrbyfloat(const std::string& key, const float amount)
@@ -272,40 +245,6 @@ std::string RedisClient::incrbyfloat(const std::string& key, const float amount)
 
     return impl->incrbyfloat(key, amount);
 }
-
-size_t RedisClient::expireat(const std::string& key, const size_t timestamp)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::expireat Error!");
-
-    return impl->expireat(key, timestamp);
-}
-
-CppRedisClient::StringReply RedisClient::dump(const std::string& key)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::dump Error!");
-
-    return impl->dump(key);
-}
-
-int RedisClient::pexpireat(const std::string& key, const size_t millisecondsTimestamp)
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::pexpireat Error!");
-
-    return impl->pexpireat(key, millisecondsTimestamp);
-}
-
-
-CppRedisClient::StringReply RedisClient::randomkey()
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::randomkey Error!");
-
-    return impl->randomkey();
-}
-
 
 std::vector<CppRedisClient::StringReply> RedisClient::mget(const std::vector<std::string>& keys)
 {
@@ -331,6 +270,64 @@ int RedisClient::msetnx(const std::map<std::string, std::string>& kvMap)
     return impl->msetnx(kvMap);
 }
 
+void RedisClient::psetex(const std::string& key, const size_t milliseconds, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::psetex Error!");
+
+    return impl->psetex(key, milliseconds, value);
+}
+
+void RedisClient::set(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::set Error!");
+
+    return impl->set(key, value);
+}
+
+size_t RedisClient::setbit(const std::string& key, const size_t offset, const size_t value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::setbit Error!");
+
+    return impl->setbit(key, offset, value);
+}
+
+void RedisClient::setex(const std::string& key, const size_t ttl, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::setex Error!");
+
+    return impl->setex(key, ttl, value);
+}
+
+int RedisClient::setnx(const std::string& key, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::setnx Error!");
+
+    return impl->setnx(key, value);
+}
+
+size_t RedisClient::setrange(const std::string& key, const size_t offset, const std::string& value)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::setrange Error!");
+
+    return impl->setrange(key, offset, value);
+}
+
+size_t RedisClient::strlen(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::strlen Error!");
+
+    return impl->strlen(key);
+}
+
+
+// hashs
 size_t RedisClient::hdel(const std::string& key, const std::string& field)
 {
     if (!impl)
