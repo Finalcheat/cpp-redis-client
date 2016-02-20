@@ -39,6 +39,25 @@ class RedisClientImpl
         RedisClientImpl(const std::string& host, const std::string& port);
         ~RedisClientImpl();
 
+    // keys
+    public:
+        size_t del(const std::string& key);
+        CppRedisClient::StringReply dump(const std::string& key);
+        int exists(const std::string& key);
+        int expire(const std::string& key, const size_t seconds);
+        size_t expireat(const std::string& key, const size_t when);
+        int move(const std::string& key, const size_t db);
+        int persist(const std::string& key);
+        int pexpire(const std::string& key, const size_t milliseconds);
+        int pexpireat(const std::string& key, const size_t when);
+        int pttl(const std::string& key);
+        CppRedisClient::StringReply randomkey();
+        void rename(const std::string& srcKey, const std::string& dstKey);
+        int renamenx(const std::string& srcKey, const std::string& dstKey);
+        int ttl(const std::string& key);
+        std::string type(const std::string& key);
+
+
     public:
         void set(const std::string& key, const std::string& value);
         void setex(const std::string& key, const size_t ttl, const std::string& value);
@@ -46,31 +65,16 @@ class RedisClientImpl
         CppRedisClient::StringReply get(const std::string& key);
         // std::string get(const std::string &key);
         const size_t append(const std::string& key, const std::string& value);
-        int pexpire(const std::string& key, const size_t milliseconds);
-        int pexpireat(const std::string& key, const size_t when);
-        int expire(const std::string& key, const size_t seconds);
-        size_t expireat(const std::string& key, const size_t when);
         int incr(const std::string& key);
         int incrby(const std::string& key, const int amount);
         int decr(const std::string& key);
         int decrby(const std::string& key, const int amount);
-        int ttl(const std::string& key);
-        int pttl(const std::string& key);
-        int persist(const std::string& key);
-        void rename(const std::string& srcKey, const std::string& dstKey);
-        int renamenx(const std::string& srcKey, const std::string& dstKey);
-        CppRedisClient::StringReply dump(const std::string& key);
-        int move(const std::string& key, const size_t db);
-        CppRedisClient::StringReply randomkey();
-        int exists(const std::string& key);
-        std::string type(const std::string& key);
         std::vector<std::string> keys(const std::string& pattern);
         size_t getbit(const std::string& key, const size_t offset);
         std::string getrange(const std::string& key, const int start, const int end);
         std::string getset(const std::string& key, const std::string& value);
         size_t strlen(const std::string& key);
         size_t bitcount(const std::string& key, const int start, const int end);
-        size_t del(const std::string& key);
         size_t setbit(const std::string& key, const size_t offset, const size_t value);
         void psetex(const std::string& key, const size_t milliseconds, const std::string& value);
         size_t setrange(const std::string& key, const size_t offset, const std::string& value);
@@ -1076,6 +1080,18 @@ int RedisClientImpl::pexpireat(const std::string& key, const size_t when)
     return _getNumResponse();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置指定key的过期时间
+ *
+ * @param key 指定的key
+ * @param seconds 过期时间(s)
+ *
+ * @return 
+ *      * 1 成功设置过期时间
+ *      * 0 设置失败(key不存在或者不允许设置过期时间)
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::expire(const std::string& key, const size_t seconds)
 {
     _sendCommandToRedisServer("EXPIRE", key, seconds);
@@ -1124,6 +1140,15 @@ int RedisClientImpl::decrby(const std::string& key, const int amount)
     return response;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回key的过期时间，与pttl类似，不同的是返回的时间单位是秒
+ *
+ * @param key 指定的key
+ *
+ * @return key的过期时间(s)
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::ttl(const std::string& key)
 {
     _sendCommandToRedisServer("TTL", key);
@@ -1131,6 +1156,15 @@ int RedisClientImpl::ttl(const std::string& key)
     return response;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回key的过期时间，与ttl类似，不同的是返回的时间单位是毫秒
+ *
+ * @param key 指定的key
+ *
+ * @return key的过期时间(ms)
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::pttl(const std::string& key)
 {
     _sendCommandToRedisServer("PTTL", key);
@@ -1145,11 +1179,20 @@ int RedisClientImpl::persist(const std::string& key)
     return response;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 对key重命名
+ *
+ * @param srcKey 源key名
+ * @param dstKey 目标key名
+ */
+/* --------------------------------------------------------------------------*/
 void RedisClientImpl::rename(const std::string& srcKey, const std::string& dstKey)
 {
     _sendCommandToRedisServer("RENAME", srcKey, dstKey);
     _getOneLineResponse();
 }
+
 
 int RedisClientImpl::renamenx(const std::string& srcKey, const std::string& dstKey)
 {
@@ -1159,6 +1202,15 @@ int RedisClientImpl::renamenx(const std::string& srcKey, const std::string& dstK
 }
 
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 序列化给定key ，如果key不存在，返回的StringReply为NULL
+ *
+ * @param key 待序列号的key
+ *
+ * @return 被序列化的值
+ */
+/* --------------------------------------------------------------------------*/
 CppRedisClient::StringReply RedisClientImpl::dump(const std::string& key)
 {
     _sendCommandToRedisServer("DUMP", key);
@@ -1167,6 +1219,19 @@ CppRedisClient::StringReply RedisClientImpl::dump(const std::string& key)
     return CppRedisClient::StringReply(buf, length);
 }
 
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 移动key到指定的db中
+ *
+ * @param key 移动的key
+ * @param db 指定的db
+ *
+ * @return 
+ *      * 1 移动成功
+ *      * 0 移动失败
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::move(const std::string& key, const size_t db)
 {
     _sendCommandToRedisServer("MOVE", key, db);
@@ -1174,6 +1239,14 @@ int RedisClientImpl::move(const std::string& key, const size_t db)
     return response;
 }
 
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回随机的key
+ *
+ * @return 随机的key
+ */
+/* --------------------------------------------------------------------------*/
 CppRedisClient::StringReply RedisClientImpl::randomkey()
 {
     _sendCommandToRedisServer("RANDOMKEY");
@@ -1182,6 +1255,18 @@ CppRedisClient::StringReply RedisClientImpl::randomkey()
     return CppRedisClient::StringReply(buf, length);
 }
 
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 判断key是否存在
+ *
+ * @param key 待判断的key
+ *
+ * @return 
+ *      * 1 key存在 
+ *      * 0 key不存在
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::exists(const std::string& key)
 {
     _sendCommandToRedisServer("EXISTS", key);
@@ -1397,6 +1482,15 @@ size_t RedisClientImpl::bitcount(const std::string& key, const int start, const 
     return _getNumResponse();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 删除key，如果key不存在，则忽略
+ *
+ * @param key 需要删除的key
+ *
+ * @return 被删除的key数量
+ */
+/* --------------------------------------------------------------------------*/
 size_t RedisClientImpl::del(const std::string& key)
 {
     _sendCommandToRedisServer("DEL", key);
