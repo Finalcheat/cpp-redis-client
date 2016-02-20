@@ -84,12 +84,29 @@ size_t RedisClient::expireat(const std::string& key, const size_t timestamp)
     return impl->expireat(key, timestamp);
 }
 
+std::vector<std::string> RedisClient::keys(const std::string& pattern)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::keys Error!");
+
+    return impl->keys(pattern);
+}
+
 int RedisClient::move(const std::string& key, const size_t db)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::move Error!");
 
     return impl->move(key, db);
+}
+
+CppRedisClient::StringReply RedisClient::object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, 
+        const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::object Error!");
+
+    return impl->object(subCommand, key);
 }
 
 int RedisClient::persist(const std::string& key)

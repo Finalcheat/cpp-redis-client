@@ -23,6 +23,7 @@ class StringReply
     public:
         explicit StringReply();
         explicit StringReply(const boost::shared_ptr<char>& buf, const int length);
+        explicit StringReply(const std::string& reply);
         std::string toString() const;
         int getLength() const;
         int size() const;

@@ -6,6 +6,7 @@
  * @date 2015-12-28
  */
 
+#include "enum_define.h"
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
@@ -46,7 +47,9 @@ class RedisClientImpl
         int exists(const std::string& key);
         int expire(const std::string& key, const size_t seconds);
         size_t expireat(const std::string& key, const size_t when);
+        std::vector<std::string> keys(const std::string& pattern);
         int move(const std::string& key, const size_t db);
+        CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, const std::string& key);
         int persist(const std::string& key);
         int pexpire(const std::string& key, const size_t milliseconds);
         int pexpireat(const std::string& key, const size_t when);
@@ -69,7 +72,6 @@ class RedisClientImpl
         int incrby(const std::string& key, const int amount);
         int decr(const std::string& key);
         int decrby(const std::string& key, const int amount);
-        std::vector<std::string> keys(const std::string& pattern);
         size_t getbit(const std::string& key, const size_t offset);
         std::string getrange(const std::string& key, const int start, const int end);
         std::string getset(const std::string& key, const std::string& value);
@@ -1242,6 +1244,51 @@ int RedisClientImpl::move(const std::string& key, const size_t db)
 
 /* --------------------------------------------------------------------------*/
 /**
+ * @brief 返回keys的内部对象
+ *
+ * @param subCommand
+ *              * REFCOUNT 返回key对应value被引用的次数
+ *              * ENCODING 返回key对应value内部的实现表示
+ *              * IDLETIME 返回key对应value被存储之后空闲的时间，以秒为单位(没有读写操作的请求) ，
+ *                          这个值返回以10秒为单位的秒级别时间，这一点可能在以后的实现中改善
+ * @param key 待返回的key
+ *
+ * @return 根据subComand的值返回对应的数据
+ */
+/* --------------------------------------------------------------------------*/
+CppRedisClient::StringReply RedisClientImpl::object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand,
+        const std::string& key)
+{
+    // * Subcommands refcount and idletime return integers.
+    // * Subcommand encoding returns a bulk reply.
+    if (subCommand == ENCODING)
+    {
+        _sendCommandToRedisServer("OBJECT", "ENCODING", key);
+        int length = -1;
+        boost::shared_ptr<char> buf = _getBulkResponse(length);
+        return CppRedisClient::StringReply(buf, length);
+    }
+    else if (subCommand == REFCOUNT)
+    {
+        _sendCommandToRedisServer("OBJECT", "REFCOUNT", key);
+        const int num = _getNumResponse();
+        // int to string
+        return CppRedisClient::StringReply(boost::lexical_cast<std::string>(num));
+    }
+    else if (subCommand == IDLETIME)
+    {
+        _sendCommandToRedisServer("OBJECT", "IDLETIME", key);
+        const int num = _getNumResponse();
+        // int to string
+        return CppRedisClient::StringReply(boost::lexical_cast<std::string>(num));
+    }
+    else
+        throw std::runtime_error("CppRedisClient::OBJECT_SUBCOMMAND subCommand args error!");
+}
+
+
+/* --------------------------------------------------------------------------*/
+/**
  * @brief 返回随机的key
  *
  * @return 随机的key
@@ -1280,10 +1327,21 @@ std::string RedisClientImpl::type(const std::string& key)
     return "";
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 查找符合模式的pattern的keys
+ *
+ * @param pattern 正则表达式
+ *
+ * @return 符合条件的keys
+ */
+/* --------------------------------------------------------------------------*/
 std::vector<std::string> RedisClientImpl::keys(const std::string& pattern)
 {
     _sendCommandToRedisServer("KEYS", pattern);
-    return std::vector<std::string>();
+    std::vector<std::string> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
 }
 
 size_t RedisClientImpl::getbit(const std::string& key, const size_t offset)

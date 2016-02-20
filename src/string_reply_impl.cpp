@@ -11,6 +11,7 @@
 #define STRING_REPLY_IMPL
 
 #include <iostream>
+#include <string>
 
 
 namespace CppRedisClient {
@@ -19,6 +20,7 @@ class StringReplyImpl
 {
     public:
         explicit StringReplyImpl(const boost::shared_ptr<char>& buf, const int length);
+        explicit StringReplyImpl(const std::string& reply);
         ~StringReplyImpl();
         int getLength() const { return _length; }
         int size() const { return _length; }
@@ -75,6 +77,12 @@ std::ostream& operator<<(std::ostream& os, StringReplyImpl& impl)
 StringReplyImpl::StringReplyImpl(const boost::shared_ptr<char>& buf, const int length) : 
     _length(length), _buf(buf)
 {
+}
+
+
+StringReplyImpl::StringReplyImpl(const std::string& reply) : _length(reply.size()), _buf(new char[reply.size()])
+{
+    std::copy(reply.begin(), reply.end(), _buf.get());
 }
 
 

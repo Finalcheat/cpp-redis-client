@@ -27,6 +27,11 @@ StringReply::StringReply(const boost::shared_ptr<char>& buf, const int length) :
 }
 
 
+StringReply::StringReply(const std::string& reply) : impl(new StringReplyImpl(reply))
+{
+}
+
+
 std::string StringReply::toString() const
 {
     if (impl)

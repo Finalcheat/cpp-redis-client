@@ -1,9 +1,7 @@
 /**
  * @file cpp_redis_client.h
- * @brief 
+ * @brief CppRedisClient声明
  * @author Finalcheat
- * @version 0.01
- * @date 2016-01-01
  */
 
 
@@ -11,6 +9,7 @@
 #define CPP_REDIS_CLIENT
 
 #include "string_reply.h"
+#include "enum_define.h"
 #include <string>
 #include <map>
 #include <set>
@@ -35,7 +34,9 @@ class RedisClient
         int exists(const std::string& key);
         int expire(const std::string& key, const size_t seconds);
         size_t expireat(const std::string& key, const size_t timestamp);
+        std::vector<std::string> keys(const std::string& pattern);
         int move(const std::string& key, const size_t db);
+        CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, const std::string& key);
         int persist(const std::string& key);
         int pexpire(const std::string& key, const size_t milliseconds);
         int pexpireat(const std::string& key, const size_t millisecondsTimestamp);
