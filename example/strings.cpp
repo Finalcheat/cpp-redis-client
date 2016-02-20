@@ -370,6 +370,131 @@ void msetnx_example()
     std::cout << line << std::endl;
 }
 
+// http://redis.io/commands/psetex
+void psetex_example()
+{
+    std::cout << "psetex_example" << std::endl;
+    std::cout << line << std::endl;
+
+    const std::string key = "psetex_example_key";
+    redisObj.del(key);
+
+    redisObj.psetex(key, 1000, "Hello");
+    std::cout << "psetex " << key << " 1000 Hello" << std::endl;
+    int ttl = redisObj.pttl(key);
+    std::cout << "pttl is " << ttl << std::endl;
+    std::cout << redisObj.get(key) << std::endl;
+
+    redisObj.del(key);
+
+    std::cout << line << std::endl;
+}
+
+// http://redis.io/commands/set
+void set_example()
+{
+    std::cout << "set_example" << std::endl;
+    std::cout << line << std::endl;
+
+    const std::string key = "set_example_key";
+    redisObj.del(key);
+
+    redisObj.set(key, "Hello");
+    std::cout << "set " << key << " Hello" << std::endl;
+    std::cout << "get " << key << " is " << redisObj.get(key) << std::endl;
+
+    redisObj.del(key);
+
+    std::cout << line << std::endl;
+}
+
+// http://redis.io/commands/setex
+void setex_example()
+{
+    std::cout << "setex_example" << std::endl;
+    std::cout << line << std::endl;
+
+    const std::string key = "setex_example_key";
+    redisObj.del(key);
+
+    redisObj.setex(key, 10, "Hello");
+    std::cout << "setex " << key << " 10 Hello" << std::endl;
+    int ttl = redisObj.ttl(key);
+    std::cout << "ttl is " << ttl << std::endl;
+    std::cout << "get " << key << " is " << redisObj.get(key) << std::endl;
+
+    redisObj.del(key);
+
+    std::cout << line << std::endl;
+}
+
+// http://redis.io/commands/setnx
+void setnx_example()
+{
+    std::cout << "setnx_example" << std::endl;
+    std::cout << line << std::endl;
+    
+    const std::string key = "setnx_example_key";
+    redisObj.del(key);
+
+    int value = redisObj.setnx(key, "Hello");
+    std::cout << "setnx " << key << " Hello" << std::endl;
+    if (value == 1)
+        std::cout << "the key was set" << std::endl;
+
+    value = redisObj.setnx(key, "World");
+    std::cout << "setnx " << key << " World" << std::endl;
+    if (value == 0)
+        std::cout << "the key was not set" << std::endl;
+
+    std::cout << "get " << key << " is " << redisObj.get(key) << std::endl;
+
+    redisObj.del(key);
+
+    std::cout << line << std::endl;
+}
+
+// http://redis.io/commands/setrange
+void setrange_example()
+{
+    std::cout << "setrange_example" << std::endl;
+    std::cout << line << std::endl;
+
+    const std::string key = "setrange_example_key";
+    redisObj.del(key);
+
+    redisObj.set(key, "Hello World");
+    std::cout << "set " << key << " Hello World" << std::endl;
+    const size_t len = redisObj.setrange(key, 6, "Redis");
+    std::cout << "setrange " << key << " 6 Redis" << std::endl;
+    std::cout << "string length is " << len << std::endl;
+    std::cout << "get " << key << " is " << redisObj.get(key) << std::endl;
+
+    redisObj.del(key);
+    
+    std::cout << line << std::endl;
+}
+
+// http://redis.io/commands/strlen
+void strlen_example()
+{
+    std::cout << "strlen_example" << std::endl;
+    std::cout << line << std::endl;
+    
+    const std::string key = "strlen_example_key";
+    redisObj.del(key);
+
+    redisObj.set(key, "Hello World");
+    std::cout << "set " << key << " Hello World" << std::endl;
+    const size_t len = redisObj.strlen(key);
+    std::cout << "strlen " << key << " is " << len << std::endl;
+
+    redisObj.del(key);
+
+    std::cout << line << std::endl;
+}
+
+
 int main()
 {
 
@@ -411,6 +536,24 @@ int main()
 
     // msetnx
     msetnx_example();
+
+    // psetex
+    psetex_example();
+
+    // set
+    set_example();
+
+    // setex
+    setex_example();
+
+    // setnx
+    setnx_example();
+
+    // setrange
+    setrange_example();
+
+    // strlen
+    strlen_example();
 
     return 0;
 }
