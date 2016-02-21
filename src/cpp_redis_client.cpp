@@ -52,6 +52,14 @@ size_t RedisClient::del(const std::string& key)
     return impl->del(key);
 }
 
+size_t RedisClient::del(const std::vector<std::string>& keys)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::del Error!");
+
+    return impl->del(keys);
+}
+
 CppRedisClient::StringReply RedisClient::dump(const std::string& key)
 {
     if (!impl)
@@ -117,7 +125,7 @@ int RedisClient::persist(const std::string& key)
     return impl->persist(key);
 }
 
-int RedisClient::pexpire(const std::string& key, const size_t milliseconds)
+int RedisClient::pexpire(const std::string& key, const int64_t milliseconds)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::pexpire Error!");
@@ -125,7 +133,7 @@ int RedisClient::pexpire(const std::string& key, const size_t milliseconds)
     return impl->pexpire(key, milliseconds);
 }
 
-int RedisClient::pexpireat(const std::string& key, const size_t millisecondsTimestamp)
+int RedisClient::pexpireat(const std::string& key, const int64_t millisecondsTimestamp)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::pexpireat Error!");
@@ -133,7 +141,7 @@ int RedisClient::pexpireat(const std::string& key, const size_t millisecondsTime
     return impl->pexpireat(key, millisecondsTimestamp);
 }
 
-int RedisClient::pttl(const std::string& key)
+int64_t RedisClient::pttl(const std::string& key)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::pttl Error!");
@@ -171,6 +179,14 @@ int RedisClient::ttl(const std::string& key)
         throw std::runtime_error("RedisClient::ttl Error!");
 
     return impl->ttl(key);
+}
+
+CppRedisClient::StringReply RedisClient::type(const std::string& key)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::type Error!");
+
+    return impl->type(key);
 }
 
 

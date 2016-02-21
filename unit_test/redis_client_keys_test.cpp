@@ -93,14 +93,14 @@ BOOST_AUTO_TEST_CASE(pexpire)
 {
     const std::string key = "pexpire_test_key";
     const std::string value = "pexpire_test_key_value";
-    const size_t milliseconds = 6000;
+    const int64_t milliseconds = 6000;
     r.set(key, value);
 
     int num = r.pexpire(key, milliseconds);
     BOOST_CHECK(num == 1);
     int ttl = r.ttl(key);
     BOOST_CHECK(ttl > 0 && ttl <= milliseconds / 1000);
-    int pttl = r.pttl(key);
+    int64_t pttl = r.pttl(key);
     BOOST_CHECK(pttl > 0 && pttl <= milliseconds);
 
     r.del(key);
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(pttl)
     const size_t milliseconds = 10 * 1000;
     r.setex(key, milliseconds / 1000, value);
 
-    int pttl = r.pttl(key);
+    int64_t pttl = r.pttl(key);
     BOOST_CHECK(pttl > 0 && pttl <= milliseconds);
 
     r.del(key);

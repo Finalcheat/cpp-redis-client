@@ -30,6 +30,7 @@ class RedisClient
     // Keys
     public:
         size_t del(const std::string& key);
+        size_t del(const std::vector<std::string>& keys);
         CppRedisClient::StringReply dump(const std::string& key);
         int exists(const std::string& key);
         int expire(const std::string& key, const size_t seconds);
@@ -38,13 +39,14 @@ class RedisClient
         int move(const std::string& key, const size_t db);
         CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, const std::string& key);
         int persist(const std::string& key);
-        int pexpire(const std::string& key, const size_t milliseconds);
-        int pexpireat(const std::string& key, const size_t millisecondsTimestamp);
-        int pttl(const std::string& key);
+        int pexpire(const std::string& key, const int64_t milliseconds);
+        int pexpireat(const std::string& key, const int64_t millisecondsTimestamp);
+        int64_t pttl(const std::string& key);
         CppRedisClient::StringReply randomkey();
         void rename(const std::string& srcKey, const std::string& dstKey);
         int renamenx(const std::string& srcKey, const std::string& dstKey);
         int ttl(const std::string& key);
+        CppRedisClient::StringReply type(const std::string& key);
 
 
     // String

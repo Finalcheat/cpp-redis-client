@@ -381,7 +381,7 @@ void psetex_example()
 
     redisObj.psetex(key, 1000, "Hello");
     std::cout << "psetex " << key << " 1000 Hello" << std::endl;
-    int ttl = redisObj.pttl(key);
+    int64_t ttl = redisObj.pttl(key);
     std::cout << "pttl is " << ttl << std::endl;
     std::cout << redisObj.get(key) << std::endl;
 
