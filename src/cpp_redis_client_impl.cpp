@@ -63,29 +63,29 @@ class RedisClientImpl
         CppRedisClient::StringReply type(const std::string& key);
 
 
+    // Strings
     public:
-        void set(const std::string& key, const std::string& value);
-        void setex(const std::string& key, const size_t ttl, const std::string& value);
-        int setnx(const std::string& key, const std::string& value);
-        CppRedisClient::StringReply get(const std::string& key);
-        // std::string get(const std::string &key);
-        const size_t append(const std::string& key, const std::string& value);
-        int incr(const std::string& key);
-        int incrby(const std::string& key, const int amount);
+        size_t append(const std::string& key, const std::string& value);
+        size_t bitcount(const std::string& key, const int start, const int end);
         int decr(const std::string& key);
         int decrby(const std::string& key, const int amount);
+        CppRedisClient::StringReply get(const std::string& key);
         size_t getbit(const std::string& key, const size_t offset);
         std::string getrange(const std::string& key, const int start, const int end);
-        std::string getset(const std::string& key, const std::string& value);
-        size_t strlen(const std::string& key);
-        size_t bitcount(const std::string& key, const int start, const int end);
-        size_t setbit(const std::string& key, const size_t offset, const size_t value);
-        void psetex(const std::string& key, const size_t milliseconds, const std::string& value);
-        size_t setrange(const std::string& key, const size_t offset, const std::string& value);
+        CppRedisClient::StringReply getset(const std::string& key, const std::string& value);
+        int incr(const std::string& key);
+        int incrby(const std::string& key, const int amount);
         std::string incrbyfloat(const std::string& key, const float amount);
         std::vector<CppRedisClient::StringReply> mget(const std::vector<std::string>& keys);
         void mset(const std::map<std::string, std::string>& kvMap);
         int msetnx(const std::map<std::string, std::string>& kvMap);
+        void psetex(const std::string& key, const int64_t milliseconds, const std::string& value);
+        void set(const std::string& key, const std::string& value);
+        size_t setbit(const std::string& key, const size_t offset, const size_t value);
+        void setex(const std::string& key, const size_t ttl, const std::string& value);
+        int setnx(const std::string& key, const std::string& value);
+        size_t setrange(const std::string& key, const size_t offset, const std::string& value);
+        size_t strlen(const std::string& key);
 
     // hashs
     public:
@@ -258,11 +258,6 @@ class RedisClientImpl
         boost::asio::streambuf _readBuf;
 
     private:
-        static boost::format SET_FORMAT; 
-        static boost::format SETEX_FORMAT;
-        static boost::format GET_FORMAT;
-        static boost::format APPEND_FORMAT;
-
         static boost::format ZERO_OPER_FORMAT;
         static boost::format ONE_OPER_FORMAT;
         static boost::format TWO_OPER_FORMAT;
@@ -297,23 +292,6 @@ boost::format RedisClientImpl::THREE_OPER_FORMAT("*4\r\n"\
         "%6%\r\n"\
         "$%7%\r\n"\
         "%8%\r\n");
-
-
-// set
-// %1% -- key size
-// %2% -- key
-// %3% -- value size
-// %4% -- value
-boost::format RedisClientImpl::SET_FORMAT("*3\r\n$3\r\nSET\r\n$%1%\r\n%2%\r\n$%3%\r\n%4%\r\n");
-
-// setex
-boost::format RedisClientImpl::SETEX_FORMAT("*4\r\n$5\r\nSETEX\r\n$%1%\r\n%2%\r\n$%3%\r\n%4%\r\n$%5%\r\n%6%\r\n");
-
-// get
-boost::format RedisClientImpl::GET_FORMAT("*2\r\n$3\r\nGET\r\n$%1%\r\n%2%\r\n");
-
-// append
-boost::format RedisClientImpl::APPEND_FORMAT("*3\r\n$6\r\nAPPEND\r\n$%1%\r\n%2%\r\n$%3%\r\n%4%\r\n");
 
 
 RedisClientImpl::RedisClientImpl(const std::string& host, const std::string& port) :
@@ -1418,27 +1396,53 @@ CppRedisClient::StringReply RedisClientImpl::type(const std::string& key)
 /* Keys End -----------------------------------------------------------------*/
 
 
-int RedisClientImpl::setnx(const std::string& key, const std::string& value)
+/* Strings ------------------------------------------------------------------*/
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 字符串连接，若key不存在，则创建一个"“字符串再执行操作
+ *
+ * @param key 指定的key
+ * @param value 追加的字符串
+ *
+ * @return 返回append后的字符串长度
+ */
+/* --------------------------------------------------------------------------*/
+size_t RedisClientImpl::append(const std::string& key, const std::string& value)
 {
-    _sendCommandToRedisServer("SETNX", key, value);
-    int response = _getNumResponse();
-    return response;
+    // send command to redis server
+    _sendCommandToRedisServer("APPEND", key, value);
+    // receive response
+    const size_t num = _getNumResponse();
+    return num;
 }
 
-int RedisClientImpl::incr(const std::string& key)
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 获取key对应的value的bit为1数量
+ *
+ * @param key 指定的key
+ * @param start 开始位置
+ * @param end 结束位置
+ *
+ * @return bit为1的数量
+ */
+/* --------------------------------------------------------------------------*/
+size_t RedisClientImpl::bitcount(const std::string& key, const int start, const int end)
 {
-    _sendCommandToRedisServer("INCR", key);
-    int response = _getNumResponse();
-    return response;
+    _sendCommandToRedisServer("BITCOUNT", key, start, end);
+    return _getNumResponse();
 }
 
-int RedisClientImpl::incrby(const std::string& key, const int amount)
-{
-    _sendCommandToRedisServer("INCRBY", key, amount);
-    int response = _getNumResponse();
-    return response;
-}
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 将key对应的数字减1
+ *
+ * @param key 指定的key
+ *
+ * @return 减少之后的value
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::decr(const std::string& key)
 {
     _sendCommandToRedisServer("DECR", key);
@@ -1446,6 +1450,16 @@ int RedisClientImpl::decr(const std::string& key)
     return response;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 将key对应的数字减amount
+ *
+ * @param key 指定的key
+ * @param amount 减少的数
+ *
+ * @return 减少之后的value
+ */
+/* --------------------------------------------------------------------------*/
 int RedisClientImpl::decrby(const std::string& key, const int amount)
 {
     _sendCommandToRedisServer("DECRBY", key, amount);
@@ -1453,8 +1467,33 @@ int RedisClientImpl::decrby(const std::string& key, const int amount)
     return response;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回key对应的value
+ *
+ * @param key 指定的key
+ *
+ * @return key对应的value
+ */
+/* --------------------------------------------------------------------------*/
+CppRedisClient::StringReply RedisClientImpl::get(const std::string& key)
+{
+    _sendCommandToRedisServer("GET", key);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
 
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回key对应的string在offset处的bit值
+ *
+ * @param key 指定的key
+ * @param offset 偏移位置
+ *
+ * @return 在offset处的bit值
+ */
+/* --------------------------------------------------------------------------*/
 size_t RedisClientImpl::getbit(const std::string& key, const size_t offset)
 {
     _sendCommandToRedisServer("GETBIT", key, offset);
@@ -1462,21 +1501,17 @@ size_t RedisClientImpl::getbit(const std::string& key, const size_t offset)
     return response;
 }
 
-std::string RedisClientImpl::getset(const std::string& key, const std::string& value)
-{
-    _sendCommandToRedisServer("GETSET", key, value);
-    std::string response;
-    _getBulkResponse(response);
-    return response;
-}
-
-size_t RedisClientImpl::strlen(const std::string& key)
-{
-    _sendCommandToRedisServer("STRLEN", key);
-    size_t response = _getNumResponse();
-    return response;
-}
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回key对应的value的子串
+ *
+ * @param key 指定的key
+ * @param start 开始位置
+ * @param end 结束位置
+ *
+ * @return 子字符串
+ */
+/* --------------------------------------------------------------------------*/
 std::string RedisClientImpl::getrange(const std::string& key, const int start, const int end)
 {
     _sendCommandToRedisServer("GETRANGE", key, start, end);
@@ -1484,6 +1519,245 @@ std::string RedisClientImpl::getrange(const std::string& key, const int start, c
     _getBulkResponse(response);
     return response;
 }
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置key的value并且返回旧的value
+ *
+ * @param key 指定的key
+ * @param value 指定的value
+ *
+ * @return 旧的value
+ */
+/* --------------------------------------------------------------------------*/
+CppRedisClient::StringReply RedisClientImpl::getset(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("GETSET", key, value);
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief key对应的value加1
+ *
+ * @param key 指定的key
+ *
+ * @return 递增后的value
+ */
+/* --------------------------------------------------------------------------*/
+int RedisClientImpl::incr(const std::string& key)
+{
+    _sendCommandToRedisServer("INCR", key);
+    int response = _getNumResponse();
+    return response;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief key对应的value加amount
+ *
+ * @param key 指定的key
+ * @param amount 增加的数
+ *
+ * @return 增加后的value
+ */
+/* --------------------------------------------------------------------------*/
+int RedisClientImpl::incrby(const std::string& key, const int amount)
+{
+    _sendCommandToRedisServer("INCRBY", key, amount);
+    int response = _getNumResponse();
+    return response;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief key对应的value加amount
+ *
+ * @param key 指定的key
+ * @param amount 增加的数
+ *
+ * @return 增加后的value
+ */
+/* --------------------------------------------------------------------------*/
+std::string RedisClientImpl::incrbyfloat(const std::string& key, const float amount)
+{
+    _sendFloatCommandToRedisServer("INCRBYFLOAT", key, amount);
+    std::string response;
+    _getBulkResponse(response);
+    return response;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回所有指定key对应的value
+ *
+ * @param keys 指定的keys
+ *
+ * @return keys对应的values
+ */
+/* --------------------------------------------------------------------------*/
+std::vector<CppRedisClient::StringReply> RedisClientImpl::mget(const std::vector<std::string>& keys)
+{
+    _sendCommandToRedisServer("MGET", keys);
+    std::vector<CppRedisClient::StringReply> replys;
+    _getMultiBulkResponse(replys);
+    return replys;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置给定的keys对应的values
+ *
+ * @param kvMap key-value字典
+ */
+/* --------------------------------------------------------------------------*/
+void RedisClientImpl::mset(const std::map<std::string, std::string>& kvMap)
+{
+    _sendCommandToRedisServer("MSET", kvMap);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 和mset类似，不同的是msetnx当其中一个(或以上)key已经存在时不执行
+ *
+ * @param kvMap key-value字典
+ *
+ * @return 
+ *      * 1 设置成功(所有key设置为对应的value)
+ *      * 0 设置失败(没有key被设置)
+ */
+/* --------------------------------------------------------------------------*/
+int RedisClientImpl::msetnx(const std::map<std::string, std::string>& kvMap)
+{
+    _sendCommandToRedisServer("MSETNX", kvMap);
+    return _getNumResponse();
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 与setex类似，不同的是过期时间以毫秒为单位
+ *
+ * @param key 指定的key
+ * @param milliseconds 过期时间(ms)
+ * @param value 指定的value
+ */
+/* --------------------------------------------------------------------------*/
+void RedisClientImpl::psetex(const std::string& key, const int64_t milliseconds, const std::string& value)
+{
+    std::string millisecondsStr = boost::lexical_cast<std::string>(milliseconds);
+    _sendCommandToRedisServer("PSETEX", key, millisecondsStr, value);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+    return; 
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置key对应的value
+ *
+ * @param key 指定的key
+ * @param value 指定的value
+ */
+/* --------------------------------------------------------------------------*/
+void RedisClientImpl::set(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("SET", key, value);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置key的value在offset处的bit值
+ *
+ * @param key 指定的key
+ * @param offset 偏移位置
+ * @param value bit值(0/1)
+ *
+ * @return 在offset处原来的bit值
+ */
+/* --------------------------------------------------------------------------*/
+size_t RedisClientImpl::setbit(const std::string& key, const size_t offset, const size_t value)
+{
+    assert(value == 0 || value == 1);
+    _sendCommandToRedisServer("SETBIT", key, offset, value);
+    return _getNumResponse();
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置key对应的value，并且设置过期时间
+ *
+ * @param key 指定的key
+ * @param ttl 过期时间(s)
+ * @param value 指定的value
+ */
+/* --------------------------------------------------------------------------*/
+void RedisClientImpl::setex(const std::string& key, const size_t ttl, const std::string& value)
+{
+    _sendCommandToRedisServer("SETEX", key, ttl, value);
+    std::string response = _getOneLineResponse();
+    assert(response == "OK");
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 设置key对应的value，当key已经存在时，忽略该操作
+ *
+ * @param key 指定的key
+ * @param value 指定的value
+ *
+ * @return
+ *      * 1 设置成功
+ *      * 0 设置失败(key已经存在)
+ */
+/* --------------------------------------------------------------------------*/
+int RedisClientImpl::setnx(const std::string& key, const std::string& value)
+{
+    _sendCommandToRedisServer("SETNX", key, value);
+    int response = _getNumResponse();
+    return response;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 修改key对应的value的子字符串
+ *
+ * @param key 指定的key
+ * @param offset 偏移位置
+ * @param value 指定的value
+ *
+ * @return 修改后的字符串长度
+ */
+/* --------------------------------------------------------------------------*/
+size_t RedisClientImpl::setrange(const std::string& key, const size_t offset, const std::string& value)
+{
+    _sendCommandToRedisServer("SETRANGE", key, offset, value);
+    return _getNumResponse();
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief 返回key对应的value(字符串)的长度
+ *
+ * @param key 指定的key
+ *
+ * @return 字符串长度
+ */
+/* --------------------------------------------------------------------------*/
+size_t RedisClientImpl::strlen(const std::string& key)
+{
+    _sendCommandToRedisServer("STRLEN", key);
+    size_t response = _getNumResponse();
+    return response;
+}
+
+/* Strings End ---------------------------------------------------------------*/
 
 
 void RedisClientImpl::_redisConnect()
@@ -1509,44 +1783,7 @@ boost::asio::ip::tcp::socket& RedisClientImpl::_getRedisConnect()
     return *_psocket;
 }
 
-void RedisClientImpl::set(const std::string& key, const std::string& value)
-{
-    // boost::format f = RedisClientImpl::SET_FORMAT;
-    // f % key.size() % key % value.size() % value;
-    // std::string buf = f.str();
-    // std::cout << "buf:" << std::endl << buf << std::endl;
 
-    // boost::asio::ip::tcp::socket& socket = _getRedisConnect();
-    // boost::asio::write(socket, boost::asio::buffer(buf));
-
-    // boost::array<char, 128> response;
-    // boost::system::error_code err_code;
-    // size_t len = socket.read_some(boost::asio::buffer(response), err_code);
-    // // std::cout << "test2" << std::endl;
-    // // size_t len = boost::asio::read(socket, boost::asio::buffer(response, 2), err_code);
-    // // size_t len = boost::asio::read_until(socket, data_, "\r\n");
-    // std::cout << "len : " << len << std::endl;
-    // std::cout.write(response.data(), len);
-    
-    _sendCommandToRedisServer("SET", key, value);
-    std::string response = _getOneLineResponse();
-    assert(response == "OK");
-}
-
-void RedisClientImpl::setex(const std::string& key, const size_t ttl, const std::string& value)
-{
-    // boost::format f = RedisClientImpl::SETEX_FORMAT;
-    // const size_t ttlLength = _getNumToStrLength(ttl);
-    // f % key.size() % key % ttlLength % ttl % value.size() % value;
-    // std::string buf = f.str();
-
-    // boost::asio::ip::tcp::socket& socket = _getRedisConnect();
-    // boost::asio::write(socket, boost::asio::buffer(buf));
-    
-    _sendCommandToRedisServer("SETEX", key, ttl, value);
-    std::string response = _getOneLineResponse();
-    assert(response == "OK");
-}
 
 
 size_t RedisClientImpl::_getNumToStrLength(const int num) const
@@ -1567,89 +1804,18 @@ size_t RedisClientImpl::_getNumToStrLength(const int num) const
 }
 
 
-const size_t RedisClientImpl::append(const std::string& key, const std::string& value)
-{
-    // boost::format f = RedisClientImpl::APPEND_FORMAT;
-    // f % key.size() % key % value.size() % value;
-    // std::string buf = f.str();
-
-    // boost::asio::ip::tcp::socket& socket = _getRedisConnect();
-    // boost::asio::write(socket, boost::asio::buffer(buf));
-
-    // send command to redis server
-    _sendCommandToRedisServer("APPEND", key, value);
-    // receive response
-    const size_t num = _getNumResponse();
-    return num;
-}
 
 
-CppRedisClient::StringReply RedisClientImpl::get(const std::string& key)
-{
-    _sendCommandToRedisServer("GET", key);
-    int length = -1;
-    boost::shared_ptr<char> buf = _getBulkResponse(length);
-    return CppRedisClient::StringReply(buf, length);
-}
 
 
-size_t RedisClientImpl::bitcount(const std::string& key, const int start, const int end)
-{
-    _sendCommandToRedisServer("BITCOUNT", key, start, end);
-    return _getNumResponse();
-}
 
 
-size_t RedisClientImpl::setbit(const std::string& key, const size_t offset, const size_t value)
-{
-    assert(value == 0 || value == 1);
-    _sendCommandToRedisServer("SETBIT", key, offset, value);
-    return _getNumResponse();
-}
 
-void RedisClientImpl::psetex(const std::string& key, const size_t milliseconds, const std::string& value)
-{
-    _sendCommandToRedisServer("PSETEX", key, milliseconds, value);
-    std::string response = _getOneLineResponse();
-    assert(response == "OK");
-    return; 
-}
 
-size_t RedisClientImpl::setrange(const std::string& key, const size_t offset, const std::string& value)
-{
-    _sendCommandToRedisServer("SETRANGE", key, offset, value);
-    return _getNumResponse();
-}
 
-std::string RedisClientImpl::incrbyfloat(const std::string& key, const float amount)
-{
-    _sendFloatCommandToRedisServer("INCRBYFLOAT", key, amount);
-    std::string response;
-    _getBulkResponse(response);
-    return response;
-}
 
-std::vector<CppRedisClient::StringReply> RedisClientImpl::mget(const std::vector<std::string>& keys)
-{
-    _sendCommandToRedisServer("MGET", keys);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    return replys;
-}
 
-void RedisClientImpl::mset(const std::map<std::string, std::string>& kvMap)
-{
-    _sendCommandToRedisServer("MSET", kvMap);
-    std::string response = _getOneLineResponse();
-    assert(response == "OK");
-    return; 
-}
 
-int RedisClientImpl::msetnx(const std::map<std::string, std::string>& kvMap)
-{
-    _sendCommandToRedisServer("MSETNX", kvMap);
-    return _getNumResponse();
-}
 
 size_t RedisClientImpl::hdel(const std::string& key, const std::string& field)
 {

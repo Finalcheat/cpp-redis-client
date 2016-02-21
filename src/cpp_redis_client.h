@@ -58,14 +58,14 @@ class RedisClient
         CppRedisClient::StringReply get(const std::string& key);
         size_t getbit(const std::string& key, const size_t offset);
         std::string getrange(const std::string& key, const int start, const int end);
-        std::string getset(const std::string& key, const std::string& value);
+        CppRedisClient::StringReply getset(const std::string& key, const std::string& value);
         int incr(const std::string& key);
         int incrby(const std::string& key, const int amount);
         std::string incrbyfloat(const std::string& key, const float amount);
         std::vector<CppRedisClient::StringReply> mget(const std::vector<std::string>& keys);
         void mset(const std::map<std::string, std::string>& kvMap);
         int msetnx(const std::map<std::string, std::string>& kvMap);
-        void psetex(const std::string &key, const size_t milliseconds, const std::string& value);
+        void psetex(const std::string &key, const int64_t milliseconds, const std::string& value);
         void set(const std::string& key, const std::string& value);
         size_t setbit(const std::string& key, const size_t offset, const size_t value);
         void setex(const std::string& key, const size_t ttl, const std::string& value);

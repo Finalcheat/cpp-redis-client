@@ -197,9 +197,9 @@ void getset_example()
     redisObj.incr(key);
     std::cout << "incr " << key << std::endl;
 
-    std::string value = redisObj.getset(key, "0");
+    CppRedisClient::StringReply value = redisObj.getset(key, "0");
     std::cout << "old value is " << value << std::endl;
-    value = redisObj.get(key).toString();
+    value = redisObj.get(key);
     std::cout << "new value is " << value << std::endl;
 
     redisObj.del(key);

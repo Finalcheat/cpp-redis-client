@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(getset)
     const std::string value = "getset_ori_value";
     r.set(key, value);
 
-    std::string response = r.getset(key, "value");
+    CppRedisClient::StringReply response = r.getset(key, "value");
     BOOST_CHECK(response == value);
     CppRedisClient::StringReply reply = r.get(key);
     BOOST_CHECK(reply.toString() == "value");

@@ -247,7 +247,7 @@ std::string RedisClient::getrange(const std::string& key, const int start, const
     return impl->getrange(key, start, end);
 }
 
-std::string RedisClient::getset(const std::string& key, const std::string& value)
+CppRedisClient::StringReply RedisClient::getset(const std::string& key, const std::string& value)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::getset Error!");
@@ -303,7 +303,7 @@ int RedisClient::msetnx(const std::map<std::string, std::string>& kvMap)
     return impl->msetnx(kvMap);
 }
 
-void RedisClient::psetex(const std::string& key, const size_t milliseconds, const std::string& value)
+void RedisClient::psetex(const std::string& key, const int64_t milliseconds, const std::string& value)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::psetex Error!");
