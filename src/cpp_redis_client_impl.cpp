@@ -109,7 +109,8 @@ class RedisClientImpl
     // lists
     public:
         CppRedisClient::StringReply lindex(const std::string& key, const int index);
-        // int linsert(const std::string& key, const int flag, const std::string& pivot, const std::string& value);
+        int linsert(const std::string& key, const CppRedisClient::LINSERT flag, const std::string& pivot,
+                const std::string& value);
         size_t llen(const std::string& key);
         CppRedisClient::StringReply lpop(const std::string& key);
         size_t lpush(const std::string& key, const std::string& value);
@@ -1997,6 +1998,31 @@ CppRedisClient::StringReply RedisClientImpl::lindex(const std::string& key, cons
 }
 
 /**
+ * @brief 把value插入存于key的list中在基准值pivot的前面或后面 
+ *
+ * @param key 指定的key
+ * @param flag 指示前面还是后面
+ * @param pivot 基准值
+ * @param value 插入的值
+ *
+ * @return 经过插入操作后的list长度，或者当pivot值找不到的时候返回-1
+ */
+int RedisClientImpl::linsert(const std::string& key, const CppRedisClient::LINSERT flag,
+        const std::string& pivot, const std::string& value)
+{
+    std::string flagStr;
+    if (flag == BEFORE)
+        flagStr = "BEFORE";
+    else if (flag == AFTER)
+        flagStr = "AFTER";
+    else
+        throw std::runtime_error("CppRedisClient::LINSERT flag args error!");
+
+    _sendCommandToRedisServer("LINSERT", flagStr, pivot, value);
+    return _getNumResponse();
+}
+
+/**
  * @brief 返回list的长度
  *
  * @param key 指定的key
@@ -2608,26 +2634,60 @@ size_t RedisClientImpl::sunionstore(const std::string& dstKey, const std::string
 
 /* Sets End -----------------------------------------------------------------*/
 
+/* Sorted Sets --------------------------------------------------------------*/
 
-// sorted sets
+/**
+ * @brief 将一个member元素加入到集合key当中，已经存在的则忽略
+ *
+ * @param key 指定的key
+ * @param score 分值
+ * @param member 指定的member
+ *
+ * @return 添加的元素数量
+ */
 size_t RedisClientImpl::zadd(const std::string& key, const int score, const std::string& member)
 {
     _sendCommandToRedisServer("ZADD", key, score, member);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回有序集合key的元素个数
+ *
+ * @param key 指定的key
+ *
+ * @return 元素个数
+ */
 size_t RedisClientImpl::zcard(const std::string& key)
 {
     _sendCommandToRedisServer("ZCARD", key);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回指定分数范围的元素个数
+ *
+ * @param key 指定的key
+ * @param min 最小分数
+ * @param max 最大分数
+ *
+ * @return 指定分数范围的元素个数
+ */
 size_t RedisClientImpl::zcount(const std::string& key, const int min, const int max)
 {
     _sendCommandToRedisServer("ZCOUNT", key, min, max);
     return _getNumResponse();
 }
 
+/**
+ * @brief 为有序集合key的成员member的score值加increment
+ *
+ * @param key 指定的key
+ * @param increment 增加的值
+ * @param member 指定的member
+ *
+ * @return member成员的新score值
+ */
 std::string RedisClientImpl::zincrby(const std::string& key, const int increment, const std::string& member)
 {
     _sendCommandToRedisServer("ZINCYBY", key, increment, member);
@@ -2637,6 +2697,15 @@ std::string RedisClientImpl::zincrby(const std::string& key, const int increment
     return replys[0];
 }
 
+/**
+ * @brief 返回有序集合key中指定范围的元素
+ *
+ * @param key 指定的key
+ * @param start 区间开始
+ * @param stop 区间结束
+ *
+ * @return 指定范围的元素
+ */
 std::vector<std::string> RedisClientImpl::zrange(const std::string& key, const int start, const int stop)
 {
     _sendCommandToRedisServer("ZRANGE", key, start, stop);
@@ -2645,6 +2714,15 @@ std::vector<std::string> RedisClientImpl::zrange(const std::string& key, const i
     return replys;
 }
 
+/**
+ * @brief 返回指定分数范围内的元素
+ *
+ * @param key 指定的key
+ * @param min 最小分数
+ * @param max 最大分数
+ *
+ * @return 指定范围内的元素
+ */
 std::vector<std::string> RedisClientImpl::zrangebyscore(const std::string& key, const int min, const int max)
 {
     _sendCommandToRedisServer("ZRANGEBYSCORE", key, min, max);
@@ -2653,6 +2731,14 @@ std::vector<std::string> RedisClientImpl::zrangebyscore(const std::string& key, 
     return replys;
 }
 
+/**
+ * @brief 返回有序集合key中成员member的排名
+ *
+ * @param key 指定的key
+ * @param member 指定的member
+ *
+ * @return member的排名 
+ */
 CppRedisClient::StringReply RedisClientImpl::zrank(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("ZRANK", key, member);
@@ -2661,30 +2747,73 @@ CppRedisClient::StringReply RedisClientImpl::zrank(const std::string& key, const
     return CppRedisClient::StringReply(buf, length);
 }
 
+/**
+ * @brief 删除有序集合key中的member成员
+ *
+ * @param key 指定的key
+ * @param member 指定的member
+ *
+ * @return 被删除的元素数量
+ */
 size_t RedisClientImpl::zrem(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("ZREM", key, member);
     return _getNumResponse();
 }
 
+/**
+ * @brief 删除有序集合key中的member成员
+ *
+ * @param key 指定的key
+ * @param members 指定的members
+ *
+ * @return 被删除的元素数量
+ */
 size_t RedisClientImpl::zrem(const std::string& key, const std::vector<std::string>& members)
 {
     _sendCommandToRedisServer("ZREM", key, members);
     return _getNumResponse();
 }
 
+/**
+ * @brief 删除有序集合key中指定区间内的元素
+ *
+ * @param key 指定的key
+ * @param start 区间开始
+ * @param stop 区间结束
+ *
+ * @return 被删除的元素数量
+ */
 size_t RedisClientImpl::zremrangebyrank(const std::string& key, const int start, const int stop)
 {
     _sendCommandToRedisServer("ZREMRANGEBYRANK", key, start, stop);
     return _getNumResponse();
 }
 
+/**
+ * @brief 删除有序集合key中score值位于[min, max]之间的元素
+ *
+ * @param key 指定的key
+ * @param min 最小分数
+ * @param max 最大分数
+ *
+ * @return 被删除的元素数量
+ */
 size_t RedisClientImpl::zremrangebyscore(const std::string& key, const int min, const int max)
 {
     _sendCommandToRedisServer("ZREMRANGEBYSCORE", key, min, max);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回有序集合key中，指定区间内的成员(按score值逆序)
+ *
+ * @param key 指定的key
+ * @param start 区间开始
+ * @param stop 区间结束
+ *
+ * @return 指定区间内成员
+ */
 std::vector<std::string> RedisClientImpl::zrevrange(const std::string& key, const int start, const int stop)
 {
     _sendCommandToRedisServer("ZREVRANGE", key, start, stop);
@@ -2693,6 +2822,15 @@ std::vector<std::string> RedisClientImpl::zrevrange(const std::string& key, cons
     return replys;
 }
 
+/**
+ * @brief 返回有序集合中score值位于[min, max]内的成员(按score值逆序)
+ *
+ * @param key 指定的key
+ * @param max 最大分数
+ * @param min 最小分数
+ *
+ * @return 指定区间内的成员
+ */
 std::vector<std::string> RedisClientImpl::zrevrangebyscore(const std::string& key, const int max, const int min)
 {
     _sendCommandToRedisServer("ZREVRANGEBYSCORE", key, max, min);
@@ -2701,6 +2839,14 @@ std::vector<std::string> RedisClientImpl::zrevrangebyscore(const std::string& ke
     return replys;
 }
 
+/**
+ * @brief 返回有序集合key中成员member的排名(按score值逆序)
+ *
+ * @param key 指定的key
+ * @param member 指定的member
+ *
+ * @return member的排名
+ */
 CppRedisClient::StringReply RedisClientImpl::zrevrank(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("ZREVRANK", key, member);
@@ -2709,6 +2855,14 @@ CppRedisClient::StringReply RedisClientImpl::zrevrank(const std::string& key, co
     return CppRedisClient::StringReply(buf, length);
 }
 
+/**
+ * @brief 返回有序集合key中成员member的score 值
+ *
+ * @param key 指定的key
+ * @param member 指定的member
+ *
+ * @return member的score值
+ */
 CppRedisClient::StringReply RedisClientImpl::zscore(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("zscore", key, member);
@@ -2718,7 +2872,15 @@ CppRedisClient::StringReply RedisClientImpl::zscore(const std::string& key, cons
 }
 
 
-// connection
+/* Connection ---------------------------------------------------------------*/
+
+/**
+ * @brief 验证密码
+ *
+ * @param password 密码
+ *
+ * @return 验证结果
+ */
 bool RedisClientImpl::auth(const std::string& password)
 {
     _sendCommandToRedisServer("AUTH", password);
@@ -2726,6 +2888,13 @@ bool RedisClientImpl::auth(const std::string& password)
     return response == "OK";
 }
 
+/**
+ * @brief 内容回显
+ *
+ * @param message 内容
+ *
+ * @return 同内容
+ */
 CppRedisClient::StringReply RedisClientImpl::echo(const std::string& message)
 {
     _sendCommandToRedisServer("ECHO", message);
@@ -2734,6 +2903,11 @@ CppRedisClient::StringReply RedisClientImpl::echo(const std::string& message)
     return CppRedisClient::StringReply(buf, length);
 }
 
+/**
+ * @brief 测试连接是否可用
+ *
+ * @return 是否可用结果
+ */
 bool RedisClientImpl::ping()
 {
     _sendCommandToRedisServer("PING");
@@ -2741,6 +2915,9 @@ bool RedisClientImpl::ping()
     return response == "PONG";
 }
 
+/**
+ * @brief 关闭连接
+ */
 void RedisClientImpl::quit()
 {
     _sendCommandToRedisServer("QUIT");
@@ -2749,6 +2926,11 @@ void RedisClientImpl::quit()
     return;
 } 
 
+/**
+ * @brief 选择数据库
+ *
+ * @param index 数据库号
+ */
 void RedisClientImpl::select(const size_t index)
 {
     _sendCommandToRedisServer("SELECT", index);
@@ -2757,30 +2939,8 @@ void RedisClientImpl::select(const size_t index)
     return;
 }
 
-
-
-
-
-
+/* Connection End -----------------------------------------------------------*/
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

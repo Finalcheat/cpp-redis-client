@@ -18,6 +18,12 @@ namespace CppRedisClient {
         IDLETIME,
     };
 
+    enum LINSERT
+    {
+        BEFORE,
+        AFTER,
+    };
+
 }
 
 

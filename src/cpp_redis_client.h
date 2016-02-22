@@ -96,7 +96,8 @@ class RedisClient
     // lists
     public:
         CppRedisClient::StringReply lindex(const std::string& key, const int index);
-        int linsert(const std::string& key, const int flag, const std::string& pivot, const std::string& value);
+        int linsert(const std::string& key, const CppRedisClient::LINSERT flag, const std::string& pivot,
+                const std::string& value);
         size_t llen(const std::string& key);
         CppRedisClient::StringReply lpop(const std::string& key);
         size_t lpush(const std::string& key, const std::string& value);
@@ -162,8 +163,13 @@ class RedisClient
         CppRedisClient::StringReply zscore(const std::string& key, const std::string& member);
 
 
+    // Connection
     public:
+        bool auth(const std::string& password);
+        CppRedisClient::StringReply echo(const std::string& message);
         bool ping();
+        void quit();
+        void select(const size_t index);
 
         // std::string get(const std::string& key) const;
 

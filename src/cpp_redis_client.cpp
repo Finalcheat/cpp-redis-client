@@ -35,14 +35,6 @@ RedisClient::~RedisClient()
     }
 }
 
-bool RedisClient::ping()
-{
-    if (!impl)
-        throw std::runtime_error("RedisClient::ping Error!");
-
-    return impl->ping();
-}
-
 // Keys
 size_t RedisClient::del(const std::string& key)
 {
@@ -491,14 +483,13 @@ CppRedisClient::StringReply RedisClient::lindex(const std::string& key, const in
     return impl->lindex(key, index);
 }
 
-int RedisClient::linsert(const std::string& key, const int flag, const std::string& pivot, 
+int RedisClient::linsert(const std::string& key, const CppRedisClient::LINSERT flag, const std::string& pivot, 
         const std::string& value)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::linsert Error!");
 
-    return 0;
-    // return impl->linsert(key, flag, pivot, value);
+    return impl->linsert(key, flag, pivot, value);
 }
 
 size_t RedisClient::llen(const std::string& key)
@@ -825,8 +816,7 @@ size_t RedisClient::zadd(const std::string& key, const int score, const std::str
     if (!impl)
         throw std::runtime_error("RedisClient::zadd Error!");
 
-    return 0;
-    // return impl->sadd(key, score, member);
+    return impl->zadd(key, score, member);
 }
 
 size_t RedisClient::zcard(const std::string& key)
@@ -940,6 +930,49 @@ CppRedisClient::StringReply RedisClient::zscore(const std::string& key, const st
 
     return impl->zscore(key, member);
 }
+
+
+// Connection
+bool RedisClient::auth(const std::string& password)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::auth Error!");
+
+    return impl->auth(password);
+}
+
+CppRedisClient::StringReply RedisClient::echo(const std::string& message)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::echo Error!");
+
+    return impl->echo(message);
+}
+
+bool RedisClient::ping()
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::ping Error!");
+
+    return impl->ping();
+}
+
+void RedisClient::quit()
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::quit Error!");
+
+    return impl->quit();
+}
+
+void RedisClient::select(const size_t index)
+{
+    if (!impl)
+        throw std::runtime_error("RedisClient::select Error!");
+
+    return impl->select(index);
+}
+
 
 }
 
