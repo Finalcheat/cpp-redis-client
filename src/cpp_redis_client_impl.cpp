@@ -2210,31 +2210,72 @@ size_t RedisClientImpl::rpushx(const std::string& key, const std::string& value)
 
 /* Lists End ----------------------------------------------------------------*/
 
-// sets
+
+/* Sets ---------------------------------------------------------------------*/
+
+/**
+ * @brief 添加member元素到集合中
+ *
+ * @param key 指定的key
+ * @param member 指定的member
+ *
+ * @return 成功添加到集合里元素的数量
+ */
 size_t RedisClientImpl::sadd(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("SADD", key, member);
     return _getNumResponse();
 }
 
+/**
+ * @brief 添加members元素到集合中
+ *
+ * @param key 指定的key
+ * @param members 指定的members
+ *
+ * @return 成功添加到集合里元素的数量
+ */
 size_t RedisClientImpl::sadd(const std::string& key, const std::vector<std::string>& members)
 {
     _sendCommandToRedisServer("SADD", key, members);
     return _getNumResponse();
 }
 
+/**
+ * @brief 添加members元素到集合中
+ *
+ * @param key 指定的key
+ * @param members 指定的members
+ *
+ * @return 成功添加到集合里元素的数量
+ */
 size_t RedisClientImpl::sadd(const std::string& key, const std::set<std::string>& members)
 {
     _sendCommandToRedisServer("SADD", key, members);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回集合中元素的数量
+ *
+ * @param key 指定的key
+ *
+ * @return 元素数量
+ */
 size_t RedisClientImpl::scard(const std::string& key)
 {
     _sendCommandToRedisServer("SCARD", key);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回一个集合与给定集合的差集的元素，不存在的key认为是空集
+ *
+ * @param key1 集合1
+ * @param key2 集合2
+ *
+ * @return 差集元素
+ */
 std::string RedisClientImpl::sdiff(const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SDIFF", key1, key2);
@@ -2247,6 +2288,14 @@ std::string RedisClientImpl::sdiff(const std::string& key1, const std::string& k
         return replys[0];
 }
 
+/**
+ * @brief 返回一个集合与给定集合的差集的元素，不存在的key认为是空集
+ *
+ * @param key 集合
+ * @param keys 集合数组
+ *
+ * @return 差集元素
+ */
 std::vector<std::string> RedisClientImpl::sdiff(const std::string& key, const std::vector<std::string>& keys)
 {
     _sendCommandToRedisServer("SDIFF", key, keys);
@@ -2255,12 +2304,30 @@ std::vector<std::string> RedisClientImpl::sdiff(const std::string& key, const st
     return replys;
 }
 
+/**
+ * @brief 该命令类似于sdiff，不同之处在于该命令不返回结果集，而是将结果存放在dstKey集合中
+ *
+ * @param dstKey 目标集合
+ * @param key1 集合1
+ * @param key2 集合2
+ *
+ * @return 结果集元素的个数
+ */
 size_t RedisClientImpl::sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SDIFFSTORE", dstKey, key1, key2);
     return _getNumResponse();
 }
 
+/**
+ * @brief 该命令类似于sdiff，不同之处在于该命令不返回结果集，而是将结果存放在dstKey集合中
+ *
+ * @param dstKey 目标集合
+ * @param key 集合
+ * @param keys 集合数组
+ *
+ * @return 结果集元素的个数
+ */
 size_t RedisClientImpl::sdiffstore(const std::string& dstKey, const std::string& key, 
         const std::vector<std::string>& keys)
 {
@@ -2268,6 +2335,14 @@ size_t RedisClientImpl::sdiffstore(const std::string& dstKey, const std::string&
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回指定所有的集合的成员的交集
+ *
+ * @param key1 集合1
+ * @param key2 集合2
+ *
+ * @return 交集
+ */
 std::string RedisClientImpl::sinter(const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SINTER", key1, key2);
@@ -2280,6 +2355,14 @@ std::string RedisClientImpl::sinter(const std::string& key1, const std::string& 
         return replys[0];
 }
 
+/**
+ * @brief 返回指定所有的集合的成员的交集
+ *
+ * @param key 集合
+ * @param keys 集合数组
+ *
+ * @return 交集
+ */
 std::vector<std::string> RedisClientImpl::sinter(const std::string& key, const std::vector<std::string>& keys)
 {
     _sendCommandToRedisServer("SINTER", key, keys);
@@ -2288,12 +2371,30 @@ std::vector<std::string> RedisClientImpl::sinter(const std::string& key, const s
     return replys;
 }
 
+/**
+ * @brief 这个命令与sinter命令类似，但是它并不是直接返回结果集，而是将结果保存在dstKey集合中
+ *
+ * @param dstKey 目标集合
+ * @param key1 集合1
+ * @param key2 集合2
+ *
+ * @return 结果集中成员的个数
+ */
 size_t RedisClientImpl::sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SINTERSTORE", dstKey, key1, key2);
     return _getNumResponse();
 }
 
+/**
+ * @brief 这个命令与sinter命令类似，但是它并不是直接返回结果集，而是将结果保存在dstKey集合中
+ *
+ * @param dstKey 目标集合
+ * @param key 集合
+ * @param key 集合数组
+ *
+ * @return 结果集中成员的个数
+ */
 size_t RedisClientImpl::sinterstore(const std::string& dstKey, const std::string& key, 
         const std::vector<std::string>& keys)
 {
@@ -2301,12 +2402,29 @@ size_t RedisClientImpl::sinterstore(const std::string& dstKey, const std::string
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回成员member是否是集合的元素
+ *
+ * @param key 指定的key
+ * @param member 指定的value
+ *
+ * @return 
+ *      * 1 如果member元素是集合key的元素
+ *      * 0 如果member元素不是集合key的元素
+ */
 int RedisClientImpl::sismember(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("SISMEMBER", key, member);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回key集合所有的元素
+ *
+ * @param key 指定的key
+ *
+ * @return 集合中的所有元素
+ */
 std::vector<std::string> RedisClientImpl::smembers(const std::string& key)
 {
     _sendCommandToRedisServer("SMEMBERS", key);
@@ -2315,12 +2433,30 @@ std::vector<std::string> RedisClientImpl::smembers(const std::string& key)
     return replys;
 }
 
+/**
+ * @brief 将member从sourceKey集合移动到dstKey集合中
+ *
+ * @param sourceKey 源集合
+ * @param dstKey 目标集合
+ * @param member 指定的member
+ *
+ * @return 
+ *      * 1 如果该元素成功移除
+ *      * 0 如果该元素不是sourceKey集合成员,无任何操作
+ */
 int RedisClientImpl::smove(const std::string& sourceKey, const std::string& dstKey, const std::string& member)
 {
     _sendCommandToRedisServer("SMOVE", sourceKey, dstKey, member);
     return _getNumResponse();
 }
 
+/**
+ * @brief 移除并返回集合中一个随机元素
+ *
+ * @param key 指定的key
+ *
+ * @return 随机元素
+ */
 CppRedisClient::StringReply RedisClientImpl::spop(const std::string& key)
 {
     _sendCommandToRedisServer("SPOP", key);
@@ -2330,6 +2466,13 @@ CppRedisClient::StringReply RedisClientImpl::spop(const std::string& key)
     return replys[0];
 }
 
+/**
+ * @brief 返回集合中一个随机元素
+ *
+ * @param key 指定的key
+ *
+ * @return 随机元素
+ */
 CppRedisClient::StringReply RedisClientImpl::srandmember(const std::string& key)
 {
     _sendCommandToRedisServer("SRANDMEMBER", key);
@@ -2339,6 +2482,13 @@ CppRedisClient::StringReply RedisClientImpl::srandmember(const std::string& key)
     return replys[0];
 }
 
+/**
+ * @brief 返回集合中count个随机元素
+ *
+ * @param key 指定的key
+ *
+ * @return 随机元素
+ */
 std::vector<std::string> RedisClientImpl::srandmember(const std::string& key, const int count)
 {
     _sendCommandToRedisServer("SRANDMEMBER", key, count);
@@ -2347,24 +2497,56 @@ std::vector<std::string> RedisClientImpl::srandmember(const std::string& key, co
     return replys;
 }
 
+/**
+ * @brief 移除集合中指定的元素
+ *
+ * @param key 指定的key
+ * @param member 指定的member
+ *
+ * @return 从集合中移除元素的个数
+ */
 size_t RedisClientImpl::srem(const std::string& key, const std::string& member)
 {
     _sendCommandToRedisServer("SREM", key, member);
     return _getNumResponse();
 }
 
+/**
+ * @brief 移除集合中指定的元素
+ *
+ * @param key 指定的key
+ * @param members 指定的members
+ *
+ * @return 从集合中移除元素的个数
+ */
 size_t RedisClientImpl::srem(const std::string& key, const std::vector<std::string>& members)
 {
     _sendCommandToRedisServer("SREM", key, members);
     return _getNumResponse();
 }
 
+/**
+ * @brief 移除集合中指定的元素
+ *
+ * @param key 指定的key
+ * @param members 指定的members
+ *
+ * @return 从集合中移除元素的个数
+ */
 size_t RedisClientImpl::srem(const std::string& key, const std::set<std::string>& members)
 {
     _sendCommandToRedisServer("SREM", key, members);
     return _getNumResponse();
 }
 
+/**
+ * @brief 返回给定的多个集合的并集中的所有元素
+ *
+ * @param key1 集合1
+ * @param key2 集合2
+ *
+ * @return 并集的元素
+ */
 std::string RedisClientImpl::sunion(const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SUNION", key1, key2);
@@ -2377,6 +2559,14 @@ std::string RedisClientImpl::sunion(const std::string& key1, const std::string& 
         return replys[0];
 }
 
+/**
+ * @brief 返回给定的多个集合的并集中的所有元素
+ *
+ * @param key 集合
+ * @param keys 集合数组
+ *
+ * @return 并集的元素
+ */
 std::vector<std::string> RedisClientImpl::sunion(const std::string& key, const std::vector<std::string>& keys)
 {
     _sendCommandToRedisServer("SUNION", key, keys);
@@ -2385,18 +2575,38 @@ std::vector<std::string> RedisClientImpl::sunion(const std::string& key, const s
     return replys;
 }
 
+/**
+ * @brief 该命令作用类似于sunion命令，不同的是它并不返回结果集，而是将结果存储在dstKey集合中
+ *
+ * @param dstKey 目标集合
+ * @param key1 集合1
+ * @param key2 集合2
+ *
+ * @return 结果集中元素的个数
+ */
 size_t RedisClientImpl::sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SUNIONSTORE", dstKey, key1, key2);
     return _getNumResponse();
 }
 
+/**
+ * @brief 该命令作用类似于sunion命令，不同的是它并不返回结果集，而是将结果存储在dstKey集合中
+ *
+ * @param dstKey 目标集合
+ * @param key 集合
+ * @param keys 集合数组
+ *
+ * @return 结果集中元素的个数
+ */
 size_t RedisClientImpl::sunionstore(const std::string& dstKey, const std::string& key, 
         const std::vector<std::string>& keys)
 {
     _sendCommandToRedisServer("SUNIONSTORE", dstKey, key, keys);
     return _getNumResponse();
 }
+
+/* Sets End -----------------------------------------------------------------*/
 
 
 // sorted sets
