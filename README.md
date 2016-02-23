@@ -48,7 +48,7 @@ int main()
 
 ## [Doxygen](http://www.stack.nl/~dimitri/doxygen)文档
 ```
-cd cpp_redis_client
-doxygen Doxyfile
+> cd cpp_redis_client
+> doxygen Doxyfile
 ```
 生成doc目录
