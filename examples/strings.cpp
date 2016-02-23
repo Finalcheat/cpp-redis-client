@@ -249,6 +249,26 @@ void incrby_example()
     std::cout << line << std::endl; 
 }
 
+// http://redis.io/commands/incrbyfloat
+void incrbyfloat_example()
+{
+    std::cout << "incrbyfloat_example" << std::endl;
+    std::cout << line << std::endl;
+
+    const std::string key = "incrbyfloat_example_key";
+    redisObj.del(key);
+
+    redisObj.set(key, "10.5");
+    std::cout << "set " << key << " 10.5" << std::endl;
+    const std::string num = redisObj.incrbyfloat(key, 4.5);
+    std::cout << "incrbyfloat " << key << " 4.5" << std::endl;
+    std::cout << "num is " << num << std::endl;
+
+    redisObj.del(key);
+
+    std::cout << line << std::endl;
+}
+
 // http://redis.io/commands/mget
 void mget_example()
 {
@@ -527,6 +547,9 @@ int main()
 
     // incrby
     incrby_example();
+
+    // incrbyfloat
+    incrbyfloat_example();
 
     // mget
     mget_example();

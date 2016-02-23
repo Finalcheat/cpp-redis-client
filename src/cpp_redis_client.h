@@ -49,7 +49,7 @@ class RedisClient
         CppRedisClient::StringReply type(const std::string& key);
 
 
-    // String
+    // Strings
     public:
         const size_t append(const std::string& key, const std::string& value);
         size_t bitcount(const std::string& key, const int start = 0, const int end = -1);

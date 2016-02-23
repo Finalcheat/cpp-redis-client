@@ -23,7 +23,7 @@ int main()
     // CppRedisClient::StringReply重载了==操作符，可以直接和std::string进行==比较
     assert(reply == value);
 
-    // toString()返回std::string
+    // RedisClient::toString()返回std::string
     std::string getValue = reply.toString();
     std::cout << getValue << std::endl;
 
