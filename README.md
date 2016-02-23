@@ -47,8 +47,8 @@ int main()
 ```
 
 ## [Doxygen](http://www.stack.nl/~dimitri/doxygen)文档
+进入cpp_redis_client目录下执行：
 ```
-> cd cpp_redis_client
 > doxygen Doxyfile
 ```
 生成doc目录
