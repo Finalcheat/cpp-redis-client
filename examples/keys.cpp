@@ -115,6 +115,63 @@ void keys_example()
     }
 }
 
+// http://redis.io/commands/move
+void move_example()
+{
+    const std::string key = "move_example_key";
+    redisObj.set(key, "Hello");
+    std::cout << "set " << key << " Hello" << std::endl;
+    CppRedisClient::StringReply reply = redisObj.get(key);
+    std::cout << "0 db get " << key << " is " << reply << std::endl;
+    redisObj.select(1);
+    reply = redisObj.get(key);
+    std::cout << "1 db get " << key << " is " << reply << std::endl;
+
+    redisObj.select(0);
+    redisObj.move(key, 1);
+    std::cout << "move " << key << " 1" << std::endl;
+
+    reply = redisObj.get(key);
+    std::cout << "0 db get " << key << " is " << reply << std::endl;
+    redisObj.select(1);
+    reply = redisObj.get(key);
+    std::cout << "1 db get " << key << " is " << reply << std::endl;
+
+    redisObj.del(key);
+    redisObj.select(0);
+}
+
+// http://redis.io/commands/object
+void object_example()
+{
+    const std::string key = "object_example_key";
+    redisObj.lpush(key, "Hello World");
+    std::cout << "lpush " << key << " Hello World" << std::endl;
+
+    CppRedisClient::StringReply result = redisObj.object(CppRedisClient::REFCOUNT, key);
+    std::cout << "object refcount " << key << std::endl;
+    std::cout << result << std::endl;
+    result = redisObj.object(CppRedisClient::ENCODING, key);
+    std::cout << "object encoding " << key << std::endl;
+    std::cout << result << std::endl;
+    result = redisObj.object(CppRedisClient::IDLETIME, key);
+    std::cout << "object idletime " << key << std::endl;
+    std::cout << result << std::endl;
+
+    redisObj.set(key, "10");
+    std::cout << "set " << key << " 10" << std::endl;
+    result = redisObj.object(CppRedisClient::ENCODING, key);
+    std::cout << "object encoding " << key << std::endl;
+    std::cout << result << std::endl;
+    redisObj.append(key, "bar");
+    std::cout << "get " << key << " is " << redisObj.get(key) << std::endl;
+    result = redisObj.object(CppRedisClient::ENCODING, key);
+    std::cout << "object encoding " << key << std::endl;
+    std::cout << result << std::endl;
+
+    redisObj.del(key);
+}
+
 
 int main()
 {
@@ -125,6 +182,8 @@ int main()
     fns.push_back(expire_example);
     fns.push_back(expireat_example);
     fns.push_back(keys_example);
+    fns.push_back(move_example);
+    fns.push_back(object_example);
 
     for (std::vector<ptFn>::const_iterator it = fns.begin(); it != fns.end(); ++it)
     {
