@@ -2417,7 +2417,7 @@ size_t RedisClientImpl::sinterstore(const std::string& dstKey, const std::string
  *
  * @param dstKey 目标集合
  * @param key 集合
- * @param key 集合数组
+ * @param keys 集合数组
  *
  * @return 结果集中成员的个数
  */
@@ -2512,6 +2512,7 @@ CppRedisClient::StringReply RedisClientImpl::srandmember(const std::string& key)
  * @brief 返回集合中count个随机元素
  *
  * @param key 指定的key
+ * @param count 元素个数
  *
  * @return 随机元素
  */
