@@ -1,9 +1,7 @@
 /**
  * @file cpp_redis_client_impl.cpp
- * @brief 
+ * @brief 协议实现的类，负责实现Redis协议
  * @author Finalcheat
- * @version 0.01
- * @date 2015-12-28
  */
 
 #include "enum_define.h"
@@ -40,7 +38,7 @@ class RedisClientImpl
         RedisClientImpl(const std::string& host, const std::string& port);
         ~RedisClientImpl();
 
-    // keys
+    // Keys
     public:
         size_t del(const std::string& key);
         size_t del(const std::vector<std::string>& keys);
@@ -51,7 +49,8 @@ class RedisClientImpl
         std::vector<std::string> keys(const std::string& pattern);
         // void migrate(const std::string& host, const std::string& port, const std::string& key);
         int move(const std::string& key, const size_t db);
-        CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, const std::string& key);
+        CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, 
+                const std::string& key);
         int persist(const std::string& key);
         int pexpire(const std::string& key, const uint64_t milliseconds);
         int pexpireat(const std::string& key, const uint64_t when);
@@ -87,7 +86,7 @@ class RedisClientImpl
         size_t setrange(const std::string& key, const size_t offset, const std::string& value);
         size_t strlen(const std::string& key);
 
-    // hashs
+    // Hashs
     public:
         size_t hdel(const std::string& key, const std::string& field);
         size_t hdel(const std::string& key, const std::vector<std::string>& fields);
@@ -106,7 +105,7 @@ class RedisClientImpl
         size_t hsetnx(const std::string& key, const std::string& field, const std::string& value);
         std::vector<std::string> hvals(const std::string& key);
 
-    // lists
+    // Lists
     public:
         CppRedisClient::StringReply lindex(const std::string& key, const int index);
         int linsert(const std::string& key, const CppRedisClient::LINSERT flag, const std::string& pivot,
@@ -126,7 +125,7 @@ class RedisClientImpl
         size_t rpush(const std::string& key, const std::vector<std::string>& values);
         size_t rpushx(const std::string& key, const std::string& value);
 
-    // sets
+    // Sets
     public:
         size_t sadd(const std::string& key, const std::string& member);
         size_t sadd(const std::string& key, const std::vector<std::string>& members);
@@ -157,7 +156,7 @@ class RedisClientImpl
         size_t sunionstore(const std::string& dstKey, const std::string& key, 
                 const std::vector<std::string>& keys);
 
-    // sorted sets
+    // Sorted Sets
     public:
         size_t zadd(const std::string& key, const int score, const std::string& member);
         size_t zcard(const std::string& key);
@@ -175,7 +174,7 @@ class RedisClientImpl
         CppRedisClient::StringReply zrevrank(const std::string& key, const std::string& member);
         CppRedisClient::StringReply zscore(const std::string& key, const std::string& member);
 
-    // connection
+    // Connection
     public:
         bool auth(const std::string& password = "");
         CppRedisClient::StringReply echo(const std::string& message);
@@ -1976,6 +1975,7 @@ std::vector<std::string> RedisClientImpl::hvals(const std::string& key)
 
 /* Hashs End ----------------------------------------------------------------*/
 
+
 /* Lists --------------------------------------------------------------------*/
 
 /**
@@ -2633,6 +2633,7 @@ size_t RedisClientImpl::sunionstore(const std::string& dstKey, const std::string
 
 /* Sets End -----------------------------------------------------------------*/
 
+
 /* Sorted Sets --------------------------------------------------------------*/
 
 /**
@@ -2855,7 +2856,7 @@ CppRedisClient::StringReply RedisClientImpl::zrevrank(const std::string& key, co
 }
 
 /**
- * @brief 返回有序集合key中成员member的score 值
+ * @brief 返回有序集合key中成员member的score值
  *
  * @param key 指定的key
  * @param member 指定的member
@@ -2869,6 +2870,9 @@ CppRedisClient::StringReply RedisClientImpl::zscore(const std::string& key, cons
     boost::shared_ptr<char> buf = _getBulkResponse(length);
     return CppRedisClient::StringReply(buf, length);
 }
+
+
+/* Sorted Sets End ----------------------------------------------------------*/
 
 
 /* Connection ---------------------------------------------------------------*/

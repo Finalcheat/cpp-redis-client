@@ -37,7 +37,8 @@ class RedisClient
         size_t expireat(const std::string& key, const size_t timestamp);
         std::vector<std::string> keys(const std::string& pattern);
         int move(const std::string& key, const size_t db);
-        CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, const std::string& key);
+        CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, 
+                const std::string& key);
         int persist(const std::string& key);
         int pexpire(const std::string& key, const uint64_t milliseconds);
         int pexpireat(const std::string& key, const uint64_t millisecondsTimestamp);
@@ -74,7 +75,7 @@ class RedisClient
         size_t strlen(const std::string& key);
 
 
-    // hashs
+    // Hashs
     public:
         size_t hdel(const std::string& key, const std::string& field);
         size_t hdel(const std::string& key, const std::vector<std::string>& fields);
@@ -93,7 +94,7 @@ class RedisClient
         size_t hsetnx(const std::string& key, const std::string& field, const std::string& value);
         std::vector<std::string> hvals(const std::string& key);
 
-    // lists
+    // Lists
     public:
         CppRedisClient::StringReply lindex(const std::string& key, const int index);
         int linsert(const std::string& key, const CppRedisClient::LINSERT flag, const std::string& pivot,
@@ -113,7 +114,7 @@ class RedisClient
         size_t rpush(const std::string& key, const std::vector<std::string>& values);
         size_t rpushx(const std::string& key, const std::string& value);
 
-    // sets
+    // Sets
     public:
         size_t sadd(const std::string& key, const std::string& member);
         size_t sadd(const std::string& key, const std::vector<std::string>& members);
@@ -144,7 +145,7 @@ class RedisClient
         size_t sunionstore(const std::string& dstKey, const std::string& key, 
                 const std::vector<std::string>& keys);
 
-    // sorted sets
+    // Sorted Sets
     public:
         size_t zadd(const std::string& key, const int score, const std::string& member);
         size_t zcard(const std::string& key);
@@ -171,7 +172,6 @@ class RedisClient
         void quit();
         void select(const size_t index);
 
-        // std::string get(const std::string& key) const;
 
     private:
         RedisClientImpl *impl;

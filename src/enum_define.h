@@ -1,6 +1,6 @@
 /**
  * @file enum_define.h
- * @brief 各种enum声明，用于CppRedisClient命令
+ * @brief 各种enum声明，用于RedisClient函数
  * @author Finalcheat
  */
 
@@ -9,8 +9,9 @@
 
 namespace CppRedisClient {
 
-    // http://redis.io/commands/object
-    // object命令subcommand参数
+    /**
+     * @brief object命令subcommand参数
+     */
     enum OBJECT_SUBCOMMAND
     {
         REFCOUNT,
@@ -18,6 +19,9 @@ namespace CppRedisClient {
         IDLETIME,
     };
 
+    /**
+     * @brief linsert命令参数
+     */
     enum LINSERT
     {
         BEFORE,
