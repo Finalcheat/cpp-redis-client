@@ -117,7 +117,7 @@ int RedisClient::persist(const std::string& key)
     return impl->persist(key);
 }
 
-int RedisClient::pexpire(const std::string& key, const int64_t milliseconds)
+int RedisClient::pexpire(const std::string& key, const uint64_t milliseconds)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::pexpire Error!");
@@ -125,7 +125,7 @@ int RedisClient::pexpire(const std::string& key, const int64_t milliseconds)
     return impl->pexpire(key, milliseconds);
 }
 
-int RedisClient::pexpireat(const std::string& key, const int64_t millisecondsTimestamp)
+int RedisClient::pexpireat(const std::string& key, const uint64_t millisecondsTimestamp)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::pexpireat Error!");
@@ -173,7 +173,7 @@ int RedisClient::ttl(const std::string& key)
     return impl->ttl(key);
 }
 
-CppRedisClient::StringReply RedisClient::type(const std::string& key)
+std::string RedisClient::type(const std::string& key)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::type Error!");
@@ -295,7 +295,7 @@ int RedisClient::msetnx(const std::map<std::string, std::string>& kvMap)
     return impl->msetnx(kvMap);
 }
 
-void RedisClient::psetex(const std::string& key, const int64_t milliseconds, const std::string& value)
+void RedisClient::psetex(const std::string& key, const uint64_t milliseconds, const std::string& value)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::psetex Error!");

@@ -39,14 +39,14 @@ class RedisClient
         int move(const std::string& key, const size_t db);
         CppRedisClient::StringReply object(const CppRedisClient::OBJECT_SUBCOMMAND subCommand, const std::string& key);
         int persist(const std::string& key);
-        int pexpire(const std::string& key, const int64_t milliseconds);
-        int pexpireat(const std::string& key, const int64_t millisecondsTimestamp);
+        int pexpire(const std::string& key, const uint64_t milliseconds);
+        int pexpireat(const std::string& key, const uint64_t millisecondsTimestamp);
         int64_t pttl(const std::string& key);
         CppRedisClient::StringReply randomkey();
         void rename(const std::string& srcKey, const std::string& dstKey);
         int renamenx(const std::string& srcKey, const std::string& dstKey);
         int ttl(const std::string& key);
-        CppRedisClient::StringReply type(const std::string& key);
+        std::string type(const std::string& key);
 
 
     // Strings
@@ -65,7 +65,7 @@ class RedisClient
         std::vector<CppRedisClient::StringReply> mget(const std::vector<std::string>& keys);
         void mset(const std::map<std::string, std::string>& kvMap);
         int msetnx(const std::map<std::string, std::string>& kvMap);
-        void psetex(const std::string &key, const int64_t milliseconds, const std::string& value);
+        void psetex(const std::string &key, const uint64_t milliseconds, const std::string& value);
         void set(const std::string& key, const std::string& value);
         size_t setbit(const std::string& key, const size_t offset, const size_t value);
         void setex(const std::string& key, const size_t ttl, const std::string& value);
