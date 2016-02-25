@@ -119,7 +119,7 @@ int RedisClient::expire(const std::string& key, const size_t seconds)
  * @brief 设置key的过期时间，与expire不同的是，时间参数是unix时间戳
  *
  * @param key 指定的key
- * @param when 过期时间(unix时间戳)
+ * @param timestamp 过期时间(unix时间戳)
  *
  * @return 
  *      * 1 成功设置过期时间
@@ -226,7 +226,7 @@ int RedisClient::pexpire(const std::string& key, const uint64_t milliseconds)
  * @brief 设置key的过期时间，时间是unix时间戳，以毫秒为单位
  *
  * @param key 指定的key
- * @param when unix时间戳(ms)
+ * @param millisecondsTimestamp unix时间戳(ms)
  *
  * @return 
  *      * 1 设置成功
