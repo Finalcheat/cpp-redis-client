@@ -229,6 +229,173 @@ void lrem_example()
     redisObj.del(key);
 }
 
+void lset_example()
+{
+    const std::string key = "lset_example_key";
+
+    redisObj.rpush(key, "one");
+    std::cout << "rpush " << key << " one" << std::endl;
+    redisObj.rpush(key, "two");
+    std::cout << "rpush " << key << " two" << std::endl;
+    redisObj.rpush(key, "three");
+    std::cout << "rpush " << key << " three" << std::endl;
+
+    redisObj.lset(key, 0, "four");
+    std::cout << "lset " << key << " 0 four" << std::endl;
+    redisObj.lset(key, -2, "five");
+    std::cout << "lset " << key << " -2 five" << std::endl;
+
+    std::vector<std::string> replys = redisObj.lrange(key, 0, -1);
+    std::cout << "lrange " << key << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    redisObj.del(key);
+}
+
+void ltrim_example()
+{
+    const std::string key = "ltrim_example_key";
+
+    redisObj.rpush(key, "one");
+    std::cout << "rpush " << key << " one" << std::endl;
+    redisObj.rpush(key, "two");
+    std::cout << "rpush " << key << " two" << std::endl;
+    redisObj.rpush(key, "three");
+    std::cout << "rpush " << key << " three" << std::endl;
+
+    redisObj.ltrim(key, 1, -1);
+    std::cout << "ltrim " << key << " 1 -1" << std::endl;
+
+    std::vector<std::string> replys = redisObj.lrange(key, 0, -1);
+    std::cout << "lrange " << key << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    redisObj.del(key);
+}
+
+void rpop_example()
+{
+    const std::string key = "rpop_example_key";
+
+    redisObj.rpush(key, "one");
+    std::cout << "rpush " << key << " one" << std::endl;
+    redisObj.rpush(key, "two");
+    std::cout << "rpush " << key << " two" << std::endl;
+    redisObj.rpush(key, "three");
+    std::cout << "rpush " << key << " three" << std::endl;
+
+    redisObj.rpop(key);
+    std::cout << "rpop " << key << std::endl;
+
+    std::vector<std::string> replys = redisObj.lrange(key, 0, -1);
+    std::cout << "lrange " << key << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    redisObj.del(key);
+}
+
+void rpoplpush_example()
+{
+    const std::string key1 = "rpoplpush_example_key1";
+    const std::string key2 = "rpoplpush_example_key2";
+
+    redisObj.rpush(key1, "one");
+    std::cout << "rpush " << key1 << " one" << std::endl;
+    redisObj.rpush(key1, "two");
+    std::cout << "rpush " << key1 << " two" << std::endl;
+    redisObj.rpush(key1, "three");
+    std::cout << "rpush " << key1 << " three" << std::endl;
+
+    redisObj.rpoplpush(key1, key2);
+    std::cout << "rpoplpush " << key1 << " " << key2 << std::endl;
+
+    std::vector<std::string> replys = redisObj.lrange(key1, 0, -1);
+    std::cout << "lrange " << key1 << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    replys = redisObj.lrange(key2, 0, -1);
+    std::cout << "lrange " << key2 << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    redisObj.del(key1);
+    redisObj.del(key2);
+}
+
+void rpush_example()
+{
+    const std::string key = "rpush_example_key";
+
+    int len = redisObj.rpush(key, "Hello");
+    std::cout << "rpush " << key << " Hello" << std::endl;
+    std::cout << len << std::endl;
+
+    len = redisObj.rpush(key, "World");
+    std::cout << "rpush " << key << " World" << std::endl;
+    std::cout << len << std::endl;
+
+
+    std::vector<std::string> replys = redisObj.lrange(key, 0, -1);
+    std::cout << "lrange " << key << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    redisObj.del(key);
+}
+
+void rpushx_example()
+{
+    const std::string key1 = "rpushx_example_key1";
+    const std::string key2 = "rpushx_example_key2";
+    redisObj.del(key1);
+    redisObj.del(key2);
+
+    int len = redisObj.rpush(key1, "Hello");
+    std::cout << "rpush " << key1 << " Hello" << std::endl;
+    std::cout << len << std::endl;
+
+    len = redisObj.rpushx(key1, "World");
+    std::cout << "rpushx " << key1 << " World" << std::endl;
+    std::cout << len << std::endl;
+
+    len = redisObj.rpushx(key2, "World");
+    std::cout << "rpushx " << key2 << " World" << std::endl;
+    std::cout << len << std::endl;
+
+    std::vector<std::string> replys = redisObj.lrange(key1, 0, -1);
+    std::cout << "lrange " << key1 << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    replys = redisObj.lrange(key2, 0, -1);
+    std::cout << "lrange " << key2 << " 0 -1" << std::endl;
+    for (std::vector<std::string>::const_iterator it = replys.begin(); it != replys.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+
+    redisObj.del(key1);
+    redisObj.del(key2);
+}
+
 
 int main()
 {
@@ -242,6 +409,12 @@ int main()
     fns.push_back(lpushx_example);
     fns.push_back(lrange_example);
     fns.push_back(lrem_example);
+    fns.push_back(lset_example);
+    fns.push_back(ltrim_example);
+    fns.push_back(rpop_example);
+    fns.push_back(rpoplpush_example);
+    fns.push_back(rpush_example);
+    fns.push_back(rpushx_example);
 
     for (std::vector<ptFn>::const_iterator it = fns.begin(); it != fns.end(); ++it)
     {

@@ -2170,10 +2170,9 @@ void RedisClientImpl::ltrim(const std::string& key, const int start, const int s
 CppRedisClient::StringReply RedisClientImpl::rpop(const std::string& key)
 {
     _sendCommandToRedisServer("RPOP", key);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    assert (replys.size() == 1);
-    return replys[0];
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 /**
@@ -2187,10 +2186,9 @@ CppRedisClient::StringReply RedisClientImpl::rpop(const std::string& key)
 CppRedisClient::StringReply RedisClientImpl::rpoplpush(const std::string& srcKey, const std::string& dstKey)
 {
     _sendCommandToRedisServer("RPOPLPUSH", srcKey, dstKey);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    assert (replys.size() == 1);
-    return replys[0];
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 /**
