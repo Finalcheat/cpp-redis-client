@@ -840,7 +840,7 @@ CppRedisClient::StringReply RedisClient::hmget(const std::string& key, const std
  *
  * @return 对应的values
  */
-std::vector<CppRedisClient::StringReply> RedisClientImpl::hmget(const std::string& key,
+std::vector<CppRedisClient::StringReply> RedisClient::hmget(const std::string& key,
         const std::vector<std::string>& fields)
 {
     if (!impl)
