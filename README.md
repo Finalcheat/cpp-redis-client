@@ -45,6 +45,7 @@ int main()
     return 0;
 }
 ```
+更多用例请看[examples](https://github.com/Finalcheat/cpp-redis-client/tree/master/examples)
 
 ## [Doxygen](http://www.stack.nl/~dimitri/doxygen)文档
 进入cpp_redis_client目录下执行：
