@@ -131,12 +131,12 @@ class RedisClientImpl
         size_t sadd(const std::string& key, const std::vector<std::string>& members);
         size_t sadd(const std::string& key, const std::set<std::string>& members);
         size_t scard(const std::string& key);
-        std::string sdiff(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sdiff(const std::string& key1, const std::string& key2);
         std::vector<std::string> sdiff(const std::string& key, const std::vector<std::string>& keys);
         size_t sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
         size_t sdiffstore(const std::string& dstKey, const std::string& key, 
                 const std::vector<std::string>& keys);
-        std::string sinter(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sinter(const std::string& key1, const std::string& key2);
         std::vector<std::string> sinter(const std::string& key, const std::vector<std::string>& keys);
         size_t sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
         size_t sinterstore(const std::string& dstKey, const std::string& key, 
@@ -2301,16 +2301,12 @@ size_t RedisClientImpl::scard(const std::string& key)
  *
  * @return 差集元素
  */
-std::string RedisClientImpl::sdiff(const std::string& key1, const std::string& key2)
+std::vector<std::string> RedisClientImpl::sdiff(const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SDIFF", key1, key2);
     std::vector<std::string> replys;
     _getMultiBulkResponse(replys);
-    assert(replys.empty() or replys.size() == 1);
-    if (replys.empty())
-        return std::string();
-    else
-        return replys[0];
+    return replys;
 }
 
 /**
@@ -2368,16 +2364,12 @@ size_t RedisClientImpl::sdiffstore(const std::string& dstKey, const std::string&
  *
  * @return 交集
  */
-std::string RedisClientImpl::sinter(const std::string& key1, const std::string& key2)
+std::vector<std::string> RedisClientImpl::sinter(const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SINTER", key1, key2);
     std::vector<std::string> replys;
     _getMultiBulkResponse(replys);
-    assert(replys.empty() or replys.size() == 1);
-    if (replys.empty())
-        return std::string();
-    else
-        return replys[0];
+    return replys;
 }
 
 /**

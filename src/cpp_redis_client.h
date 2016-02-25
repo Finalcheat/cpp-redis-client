@@ -120,12 +120,12 @@ class RedisClient
         size_t sadd(const std::string& key, const std::vector<std::string>& members);
         size_t sadd(const std::string& key, const std::set<std::string>& members);
         size_t scard(const std::string& key);
-        std::string sdiff(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sdiff(const std::string& key1, const std::string& key2);
         std::vector<std::string> sdiff(const std::string& key, const std::vector<std::string>& keys);
         size_t sdiffstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
         size_t sdiffstore(const std::string& dstKey, const std::string& key, 
                 const std::vector<std::string>& keys);
-        std::string sinter(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sinter(const std::string& key1, const std::string& key2);
         std::vector<std::string> sinter(const std::string& key, const std::vector<std::string>& keys);
         size_t sinterstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
         size_t sinterstore(const std::string& dstKey, const std::string& key, 

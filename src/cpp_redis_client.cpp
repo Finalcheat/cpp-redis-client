@@ -1271,7 +1271,7 @@ size_t RedisClient::scard(const std::string& key)
  *
  * @return 差集元素
  */
-std::string RedisClient::sdiff(const std::string& key1, const std::string& key2)
+std::vector<std::string> RedisClient::sdiff(const std::string& key1, const std::string& key2)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::sdiff Error!");
@@ -1338,7 +1338,7 @@ size_t RedisClient::sdiffstore(const std::string& dstKey, const std::string& key
  *
  * @return 交集
  */
-std::string RedisClient::sinter(const std::string& key1, const std::string& key2)
+std::vector<std::string> RedisClient::sinter(const std::string& key1, const std::string& key2)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::sinter Error!");
