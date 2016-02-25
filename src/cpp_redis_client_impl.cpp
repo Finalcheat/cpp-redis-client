@@ -196,7 +196,7 @@ class RedisClientImpl
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int value);
         void _sendFloatCommandToRedisServer(const std::string& cmd, const std::string& key, const float value);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const std::string& value);
-        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const size_t num,
+        void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int num,
                 const std::string& value);
         void _sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int start,
                 const int end);
@@ -386,7 +386,7 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     boost::asio::write(socket, _writeBuf);
 }
 
-void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key, const size_t num,
+void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const std::string& key, const int num,
         const std::string& value)
 {
     boost::format f = RedisClientImpl::THREE_OPER_FORMAT;
@@ -647,7 +647,7 @@ void RedisClientImpl::_getMultiBulkResponse(std::vector<std::string>& replys)
         // std::cout << "num : " << num << std::endl;
         if (num == -1)
             return;
-        assert(num > 0);
+        assert(num >= 0);
         replys.resize(num);
         for (int i = 0; i < num; ++i)
         {
@@ -1989,10 +1989,9 @@ std::vector<std::string> RedisClientImpl::hvals(const std::string& key)
 CppRedisClient::StringReply RedisClientImpl::lindex(const std::string& key, const int index)
 {
     _sendCommandToRedisServer("LINDEX", key, index);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    assert (replys.size() == 1);
-    return replys[0];
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 /**
@@ -2016,7 +2015,12 @@ int RedisClientImpl::linsert(const std::string& key, const CppRedisClient::LINSE
     else
         throw std::runtime_error("CppRedisClient::LINSERT flag args error!");
 
-    _sendCommandToRedisServer("LINSERT", flagStr, pivot, value);
+    std::vector<std::string> args;
+    args.push_back(key);
+    args.push_back(flagStr);
+    args.push_back(pivot);
+    args.push_back(value);
+    _sendCommandToRedisServer("LINSERT", args);
     return _getNumResponse();
 }
 
@@ -2044,10 +2048,9 @@ size_t RedisClientImpl::llen(const std::string& key)
 CppRedisClient::StringReply RedisClientImpl::lpop(const std::string& key)
 {
     _sendCommandToRedisServer("LPOP", key);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    assert (replys.size() == 1);
-    return replys[0];
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 /**
