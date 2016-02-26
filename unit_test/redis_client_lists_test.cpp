@@ -215,11 +215,4 @@ BOOST_AUTO_TEST_CASE(rpushx)
 }
 
 
-
-
-
-
-
-
-
 BOOST_AUTO_TEST_SUITE_END()
