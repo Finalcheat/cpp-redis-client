@@ -1551,7 +1551,7 @@ size_t RedisClient::srem(const std::string& key, const std::set<std::string>& me
  *
  * @return 并集的元素
  */
-std::string RedisClient::sunion(const std::string& key1, const std::string& key2)
+std::vector<std::string> RedisClient::sunion(const std::string& key1, const std::string& key2)
 {
     if (!impl)
         throw std::runtime_error("RedisClient::sunion Error!");

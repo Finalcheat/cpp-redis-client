@@ -150,7 +150,7 @@ class RedisClientImpl
         size_t srem(const std::string& key, const std::string& member);
         size_t srem(const std::string& key, const std::vector<std::string>& members);
         size_t srem(const std::string& key, const std::set<std::string>& members);
-        std::string sunion(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sunion(const std::string& key1, const std::string& key2);
         std::vector<std::string> sunion(const std::string& key, const std::vector<std::string>& keys);
         size_t sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
         size_t sunionstore(const std::string& dstKey, const std::string& key, 
@@ -2477,10 +2477,9 @@ int RedisClientImpl::smove(const std::string& sourceKey, const std::string& dstK
 CppRedisClient::StringReply RedisClientImpl::spop(const std::string& key)
 {
     _sendCommandToRedisServer("SPOP", key);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    assert(replys.size() == 1);
-    return replys[0];
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 /**
@@ -2493,10 +2492,9 @@ CppRedisClient::StringReply RedisClientImpl::spop(const std::string& key)
 CppRedisClient::StringReply RedisClientImpl::srandmember(const std::string& key)
 {
     _sendCommandToRedisServer("SRANDMEMBER", key);
-    std::vector<CppRedisClient::StringReply> replys;
-    _getMultiBulkResponse(replys);
-    assert(replys.size() == 1);
-    return replys[0];
+    int length = -1;
+    boost::shared_ptr<char> buf = _getBulkResponse(length);
+    return CppRedisClient::StringReply(buf, length);
 }
 
 /**
@@ -2565,16 +2563,12 @@ size_t RedisClientImpl::srem(const std::string& key, const std::set<std::string>
  *
  * @return 并集的元素
  */
-std::string RedisClientImpl::sunion(const std::string& key1, const std::string& key2)
+std::vector<std::string> RedisClientImpl::sunion(const std::string& key1, const std::string& key2)
 {
     _sendCommandToRedisServer("SUNION", key1, key2);
     std::vector<std::string> replys;
     _getMultiBulkResponse(replys);
-    assert(replys.empty() or replys.size() == 1);
-    if (replys.empty())
-        return std::string();
-    else
-        return replys[0];
+    return replys;
 }
 
 /**

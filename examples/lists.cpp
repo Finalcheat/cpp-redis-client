@@ -5,6 +5,7 @@
 
 CppRedisClient::RedisClient redisObj("localhost");
 
+// http://redis.io/commands/lindex
 void lindex_example()
 {
     const std::string key = "lindex_example_key";
@@ -29,6 +30,7 @@ void lindex_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/linsert
 void linsert_example()
 {
     const std::string key = "linsert_example_key";
@@ -55,6 +57,7 @@ void linsert_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/llen
 void llen_example()
 {
     const std::string key = "llen_example_key";
@@ -74,6 +77,7 @@ void llen_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/lpop
 void lpop_example()
 {
     const std::string key = "lpop_example_key";
@@ -101,6 +105,7 @@ void lpop_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/lpush
 void lpush_example()
 {
     const std::string key = "lpush_example_key";
@@ -123,6 +128,7 @@ void lpush_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/lpushx
 void lpushx_example()
 {
     const std::string key1 = "lpush_example_key1";
@@ -159,6 +165,7 @@ void lpushx_example()
     redisObj.del(key2);
 }
 
+// http://redis.io/commands/lrange
 void lrange_example()
 {
     const std::string key = "lrange_example_key";
@@ -203,6 +210,7 @@ void lrange_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/lrem
 void lrem_example()
 {
     const std::string key = "lrem_example_key";
@@ -229,6 +237,7 @@ void lrem_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/lset
 void lset_example()
 {
     const std::string key = "lset_example_key";
@@ -255,6 +264,7 @@ void lset_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/ltrim
 void ltrim_example()
 {
     const std::string key = "ltrim_example_key";
@@ -279,6 +289,7 @@ void ltrim_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/rpop
 void rpop_example()
 {
     const std::string key = "rpop_example_key";
@@ -303,6 +314,7 @@ void rpop_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/rpoplpush
 void rpoplpush_example()
 {
     const std::string key1 = "rpoplpush_example_key1";
@@ -336,6 +348,7 @@ void rpoplpush_example()
     redisObj.del(key2);
 }
 
+// http://redis.io/commands/rpush
 void rpush_example()
 {
     const std::string key = "rpush_example_key";
@@ -359,6 +372,7 @@ void rpush_example()
     redisObj.del(key);
 }
 
+// http://redis.io/commands/rpushx
 void rpushx_example()
 {
     const std::string key1 = "rpushx_example_key1";

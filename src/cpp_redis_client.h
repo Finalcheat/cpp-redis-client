@@ -139,7 +139,7 @@ class RedisClient
         size_t srem(const std::string& key, const std::string& member);
         size_t srem(const std::string& key, const std::vector<std::string>& members);
         size_t srem(const std::string& key, const std::set<std::string>& members);
-        std::string sunion(const std::string& key1, const std::string& key2);
+        std::vector<std::string> sunion(const std::string& key1, const std::string& key2);
         std::vector<std::string> sunion(const std::string& key, const std::vector<std::string>& keys);
         size_t sunionstore(const std::string& dstKey, const std::string& key1, const std::string& key2);
         size_t sunionstore(const std::string& dstKey, const std::string& key, 
