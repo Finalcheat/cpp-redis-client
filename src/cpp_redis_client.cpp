@@ -1644,7 +1644,7 @@ size_t RedisClient::zcard(const std::string& key)
     if (!impl)
         throw std::runtime_error("RedisClient::zcard Error!");
 
-    return impl->scard(key);
+    return impl->zcard(key);
 }
 
 /**
@@ -1791,7 +1791,7 @@ size_t RedisClient::zremrangebyrank(const std::string& key, const int start, con
  */
 size_t RedisClient::zremrangebyscore(const std::string& key, const int min, const int max)
 {
-    if (impl)
+    if (!impl)
         throw std::runtime_error("RedisClient::zremrangebyscore Error!");
 
     return impl->zremrangebyscore(key, min, max);

@@ -339,6 +339,7 @@ void RedisClientImpl::_sendCommandToRedisServer(const std::string& cmd, const st
     boost::format f = RedisClientImpl::ONE_OPER_FORMAT;
     f % cmd.size() % cmd % key.size() % key;
     // const std::string buf = f.str();
+    // std::cout << buf << std::endl;
     std::ostream os(&_writeBuf);
     os << f;
 
@@ -926,8 +927,19 @@ boost::shared_ptr<char> RedisClientImpl::_getBulkResponse(int& length)
             return _readBulkResponseToChar(num);
         }
     }
+    else if (c == ':')
+    {
+        int num = _readResponseNum();
+        std::string numStr = boost::lexical_cast<std::string>(num);
+        length = numStr.size();
+        boost::shared_ptr<char> buf(new char[numStr.size()]);
+        std::copy(numStr.begin(), numStr.end(), buf.get());
+        return buf;
+    }
     else if (c == '-')
     {
+        std::string error = _readResponseStr();
+        throw std::runtime_error(error);
     }
     else
     {
@@ -2677,11 +2689,10 @@ size_t RedisClientImpl::zcount(const std::string& key, const int min, const int 
  */
 std::string RedisClientImpl::zincrby(const std::string& key, const int increment, const std::string& member)
 {
-    _sendCommandToRedisServer("ZINCYBY", key, increment, member);
-    std::vector<std::string> replys;
-    _getMultiBulkResponse(replys);
-    assert(replys.size() == 1);
-    return replys[0];
+    _sendCommandToRedisServer("ZINCRBY", key, increment, member);
+    std::string reply;
+    _getBulkResponse(reply);
+    return reply;
 }
 
 /**
