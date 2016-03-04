@@ -1,5 +1,5 @@
 # cpp-redis-client
-使用C++根据[Redis协议](http://redis.io/topics/protocol)写的客户端，网络部分依赖[Boost.Asio](http://www.boost.org/doc/libs/1_60_0/doc/html/boost_asio.html)。
+使用C++根据[Redis协议](http://redis.io/topics/protocol)写的客户端库，网络部分依赖[Boost.Asio](http://www.boost.org/doc/libs/1_60_0/doc/html/boost_asio.html)。
 
 ## 编译
 g++ -O2 src/cpp_redis_client.cpp src/string_reply.cpp -I {BOOST_INCLUDE} -lboost_system -L {BOOST_LIB}
