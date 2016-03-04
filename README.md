@@ -6,7 +6,7 @@ g++ -O2 src/cpp_redis_client.cpp src/string_reply.cpp -I {BOOST_INCLUDE} -lboost
 
 ## 简单用例
 ```
-#include "../src/cpp_redis_client.h"
+#include "src/cpp_redis_client.h"
 #include <iostream>
 #include <string>
 
